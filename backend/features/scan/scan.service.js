@@ -1,5 +1,6 @@
 import { runPuppeteerScan } from "../puppeteer/puppeteer.service.js";
 import { analyzePerformance } from "../lighthouse/lighthouse.service.js";
+import { calculateScore } from "../../utils/scoring.js";
 
 const getPerformanceFallback = () => ({
   performanceScore: 0,
@@ -20,21 +21,50 @@ export async function runScan(url) {
     void error;
   }
 
+  const consoleErrors = Array.isArray(scanResult?.consoleErrors)
+    ? scanResult.consoleErrors
+    : [];
+  const networkErrors = Array.isArray(scanResult?.networkErrors)
+    ? scanResult.networkErrors
+    : [];
+  const seo = scanResult?.seo || {
+    title: "Missing",
+    metaDescription: "Missing",
+    h1: { count: 0, texts: [] },
+    images: { total: 0, missingAlt: 0 },
+    links: { total: 0 },
+  };
+
+  let score = null;
+  try {
+    const normalizedSeo = {
+      hasTitle: typeof seo?.title === "string" && seo.title.trim() !== "" && seo.title !== "Missing",
+      hasMetaDescription:
+        typeof seo?.metaDescription === "string" &&
+        seo.metaDescription.trim() !== "" &&
+        seo.metaDescription !== "Missing",
+      h1Count: Number(seo?.h1?.count) || 0,
+      totalImages: Number(seo?.images?.total) || 0,
+      missingAlt: Number(seo?.images?.missingAlt) || 0,
+    };
+
+    score = calculateScore({
+      seo: normalizedSeo,
+      performance,
+      consoleErrors,
+      networkErrors,
+    });
+  } catch (error) {
+    void error;
+    score = null;
+  }
+
   return {
     screenshot: scanResult?.screenshot || "",
-    consoleErrors: Array.isArray(scanResult?.consoleErrors)
-      ? scanResult.consoleErrors
-      : [],
-    networkErrors: Array.isArray(scanResult?.networkErrors)
-      ? scanResult.networkErrors
-      : [],
-    seo: scanResult?.seo || {
-      title: "Missing",
-      metaDescription: "Missing",
-      h1: { count: 0, texts: [] },
-      images: { total: 0, missingAlt: 0 },
-      links: { total: 0 },
-    },
+    consoleErrors,
+    networkErrors,
+    seo,
     performance,
+    score,
   };
 }
