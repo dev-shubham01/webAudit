@@ -1,0 +1,36 @@
+---
+description: Enforce backend feature-based architecture for WebAudit AI
+alwaysApply: true
+---
+
+# WebAudit AI Backend Architecture Rule
+
+Follow Feature-Based Architecture with internal layering for all backend changes.
+
+## Required Structure
+
+- Place backend logic in `backend/features/<feature-name>/`.
+- For endpoint features, split responsibilities into:
+  - `<feature>.route.js` (routing only)
+  - `<feature>.controller.js` (HTTP handling + validation)
+  - `<feature>.service.js` (business logic / orchestration)
+- Keep shared helpers in `backend/utils/`.
+
+## Orchestration Rule
+
+- `backend/features/scan/scan.service.js` is the orchestrator for full scans.
+- It calls specialized modules and merges their results.
+- Do not put cross-feature orchestration in route or controller files.
+
+## Existing Feature Modules
+
+- `backend/features/puppeteer/puppeteer.service.js`
+- `backend/features/seo/seo.service.js`
+- `backend/features/lighthouse/lighthouse.service.js`
+
+## Coding Standards
+
+- One clear responsibility per file.
+- Use `async/await` for async flows.
+- Add explicit error handling and return consistent response shapes.
+- Keep modules small, focused, and scalable.
