@@ -40,3 +40,6 @@ Thumbs.db
 # Editor and IDE settings
 .vscode/
 .idea/
+
+# Cursor files
+.cursor/
