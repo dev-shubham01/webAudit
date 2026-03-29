@@ -12,6 +12,12 @@ const getSeoFallback = () => ({
   links: {
     total: 0,
   },
+  canonical: "Missing",
+  openGraph: {
+    title: "Missing",
+    description: "Missing",
+    image: "Missing",
+  },
 });
 
 const sanitizeText = (value) => {
@@ -52,6 +58,12 @@ export async function analyzeSEO(page) {
             h1: { count: 0, texts: [] },
             images: { total: 0, missingAlt: 0 },
             links: { total: 0 },
+            canonical: "Missing",
+            openGraph: {
+              title: "Missing",
+              description: "Missing",
+              image: "Missing",
+            },
           };
         }
 
@@ -60,6 +72,14 @@ export async function analyzeSEO(page) {
         const metaDescriptionText = normalizeText(
           metaDescriptionTag?.getAttribute("content") || "",
         );
+        const canonicalTag = safeDocument.querySelector('link[rel="canonical"]');
+        const canonicalText = normalizeText(canonicalTag?.getAttribute("href") || "");
+
+        const ogTitleTag = safeDocument.querySelector('meta[property="og:title"]');
+        const ogDescriptionTag = safeDocument.querySelector(
+          'meta[property="og:description"]',
+        );
+        const ogImageTag = safeDocument.querySelector('meta[property="og:image"]');
 
         const h1Elements = Array.from(safeDocument.querySelectorAll("h1") || []);
         const h1Texts = h1Elements
@@ -88,6 +108,14 @@ export async function analyzeSEO(page) {
           links: {
             total: linkElements.length || 0,
           },
+          canonical: canonicalText || "Missing",
+          openGraph: {
+            title: normalizeText(ogTitleTag?.getAttribute("content") || "") || "Missing",
+            description:
+              normalizeText(ogDescriptionTag?.getAttribute("content") || "") ||
+              "Missing",
+            image: normalizeText(ogImageTag?.getAttribute("content") || "") || "Missing",
+          },
         };
       } catch (error) {
         void error;
@@ -97,6 +125,12 @@ export async function analyzeSEO(page) {
           h1: { count: 0, texts: [] },
           images: { total: 0, missingAlt: 0 },
           links: { total: 0 },
+          canonical: "Missing",
+          openGraph: {
+            title: "Missing",
+            description: "Missing",
+            image: "Missing",
+          },
         };
       }
     });
@@ -118,6 +152,12 @@ export async function analyzeSEO(page) {
       },
       links: {
         total: sanitizeCount(seoData?.links?.total),
+      },
+      canonical: sanitizeText(seoData?.canonical),
+      openGraph: {
+        title: sanitizeText(seoData?.openGraph?.title),
+        description: sanitizeText(seoData?.openGraph?.description),
+        image: sanitizeText(seoData?.openGraph?.image),
       },
     };
   } catch (error) {

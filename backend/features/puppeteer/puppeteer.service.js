@@ -6,6 +6,7 @@ const GOTO_TIMEOUT_MS = 30000;
 const BODY_WAIT_MS = 10000;
 const POST_LOAD_WAIT_MS = 3000;
 const POST_SCROLL_WAIT_MS = 2000;
+const BLOCKED_TITLE_PATTERNS = ["access denied", "forbidden", "not allowed"];
 
 const getPuppeteerFallback = () => ({
   screenshot: null,
@@ -41,6 +42,7 @@ export async function runPuppeteerScan(url) {
     unknownLinks: [],
   };
   let browser;
+  let isBlocked = false;
   const normalizedUrl =
     typeof url === "string" && /^https?:\/\//i.test(url.trim())
       ? url.trim()
@@ -80,8 +82,9 @@ export async function runPuppeteerScan(url) {
       }
     });
 
+    let mainResponse = null;
     try {
-      await page.goto(normalizedUrl, {
+      mainResponse = await page.goto(normalizedUrl, {
         waitUntil: "domcontentloaded",
         timeout: GOTO_TIMEOUT_MS,
       });
@@ -101,6 +104,37 @@ export async function runPuppeteerScan(url) {
     console.log("Page title:", title);
     if (!title || !title.trim()) {
       console.log("Page not loaded properly");
+    }
+
+    const responseStatus = Number(mainResponse?.status?.());
+    const normalizedTitle = String(title || "").toLowerCase();
+    const blockedByStatus = responseStatus === 401 || responseStatus === 403;
+    const blockedByTitle = BLOCKED_TITLE_PATTERNS.some((pattern) =>
+      normalizedTitle.includes(pattern),
+    );
+    isBlocked = blockedByStatus || blockedByTitle;
+
+    if (isBlocked) {
+      console.log("Site blocked automation:", normalizedUrl);
+      try {
+        const buffer = await page.screenshot({
+          type: "png",
+          fullPage: true,
+        });
+        screenshot = buffer.toString("base64");
+      } catch (screenshotError) {
+        console.error("Screenshot failed:", screenshotError?.message);
+        screenshot = null;
+      }
+
+      return {
+        screenshot,
+        consoleErrors,
+        networkErrors,
+        seo: null,
+        links,
+        isBlocked: true,
+      };
     }
 
     await page.evaluate(async () => {
@@ -158,5 +192,6 @@ export async function runPuppeteerScan(url) {
     networkErrors,
     seo,
     links,
+    isBlocked,
   };
 }

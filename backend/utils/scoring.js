@@ -17,8 +17,8 @@ function getLabel(score) {
   return "Poor";
 }
 
-function createInsight(type, issue, severity, fix) {
-  return { type, issue, severity, fix };
+function createInsight(type, issue, severity, fix, why = null) {
+  return { type, issue, severity, fix, why };
 }
 
 function calculateSeoScore(seo) {
@@ -144,6 +144,51 @@ function getSeoInsights(seo) {
         )
       );
     }
+  }
+
+  if (!seo.hasCanonical) {
+    insights.push(
+      createInsight(
+        "SEO",
+        "Missing canonical tag",
+        "medium",
+        "Add <link rel='canonical'> to define preferred URL",
+        "Helps prevent duplicate content issues"
+      )
+    );
+  }
+
+  if (!seo.hasOgTitle) {
+    insights.push(
+      createInsight(
+        "SEO",
+        "Missing Open Graph title",
+        "medium",
+        "Add og:title for better social sharing"
+      )
+    );
+  }
+
+  if (!seo.hasOgDescription) {
+    insights.push(
+      createInsight(
+        "SEO",
+        "Missing Open Graph description",
+        "medium",
+        "Add og:description for richer social link previews"
+      )
+    );
+  }
+
+  if (!seo.hasOgImage) {
+    insights.push(
+      createInsight(
+        "SEO",
+        "Missing Open Graph image",
+        "low",
+        "Add og:image to show a preview image when shared"
+      )
+    );
   }
 
   return insights;

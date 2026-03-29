@@ -247,6 +247,7 @@ export function Dashboard() {
     consoleErrors,
     networkErrors,
     links,
+    isBlocked: scanResult?.isBlocked === true,
   });
 
   const hasRealTitle =
@@ -263,6 +264,20 @@ export function Dashboard() {
   const missingAlt = Number(seo?.images?.missingAlt) || 0;
   const totalImages = Number(seo?.images?.total) || 0;
   const altOk = totalImages === 0 || missingAlt === 0;
+  const canonicalValue = typeof seo?.canonical === "string" ? seo.canonical.trim() : "";
+  const canonicalPresent = canonicalValue !== "" && canonicalValue !== "Missing";
+  const ogTitleValue =
+    typeof seo?.openGraph?.title === "string" ? seo.openGraph.title.trim() : "";
+  const ogDescriptionValue =
+    typeof seo?.openGraph?.description === "string"
+      ? seo.openGraph.description.trim()
+      : "";
+  const ogImageValue =
+    typeof seo?.openGraph?.image === "string" ? seo.openGraph.image.trim() : "";
+  const ogTitlePresent = ogTitleValue !== "" && ogTitleValue !== "Missing";
+  const ogDescriptionPresent =
+    ogDescriptionValue !== "" && ogDescriptionValue !== "Missing";
+  const ogImagePresent = ogImageValue !== "" && ogImageValue !== "Missing";
 
   const host =
     scannedUrl != null
@@ -555,6 +570,47 @@ export function Dashboard() {
                   ? `${missingAlt} of ${totalImages} images`
                   : undefined
               }
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className={cardShell}>
+        <CardHeader className="border-b border-[#334155] pb-4">
+          <CardTitle className={sectionTitleClass}>Advanced SEO</CardTitle>
+          <p className={sectionDescClass}>
+            Canonical and Open Graph metadata checks
+          </p>
+        </CardHeader>
+        <CardContent className="pt-6">
+          <div className="grid gap-6 sm:grid-cols-2">
+            <SeoRow
+              label="Canonical"
+              ok={canonicalPresent}
+              okText="Present"
+              badText="Missing"
+              detail={canonicalPresent ? canonicalValue : null}
+            />
+            <SeoRow
+              label="Open Graph title"
+              ok={ogTitlePresent}
+              okText="Present"
+              badText="Missing"
+              detail={ogTitlePresent ? truncate(ogTitleValue, 56) : null}
+            />
+            <SeoRow
+              label="Open Graph description"
+              ok={ogDescriptionPresent}
+              okText="Present"
+              badText="Missing"
+              detail={ogDescriptionPresent ? truncate(ogDescriptionValue, 72) : null}
+            />
+            <SeoRow
+              label="Open Graph image"
+              ok={ogImagePresent}
+              okText="Present"
+              badText="Missing"
+              detail={ogImagePresent ? truncate(ogImageValue, 56) : null}
             />
           </div>
         </CardContent>

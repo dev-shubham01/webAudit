@@ -8,11 +8,22 @@ export function generateInsights({
   consoleErrors,
   networkErrors,
   links,
+  isBlocked,
 }) {
   const insights = [];
   const consoles = Array.isArray(consoleErrors) ? consoleErrors : [];
   const networks = Array.isArray(networkErrors) ? networkErrors : [];
   const normalizedLinks = links && typeof links === "object" ? links : null;
+
+  if (isBlocked) {
+    insights.push({
+      type: "System",
+      severity: "medium",
+      message: "Website blocked automated scan",
+      why: "Some websites restrict bots for security",
+      fix: "Try scanning a different page or use authenticated scanning (future feature)",
+    });
+  }
 
   if (seo && typeof seo === "object") {
     if (seo.metaDescription === "Missing") {
