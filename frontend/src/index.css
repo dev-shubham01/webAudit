@@ -1,0 +1,66 @@
+@import "tailwindcss";
+
+/* Global design tokens — use utilities: bg-background, bg-card, text-foreground, rounded-card, etc. */
+@theme {
+  /* Typography */
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
+    "Segoe UI Emoji";
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    monospace;
+
+  /* Surfaces & borders (dark-only) */
+  --color-background: #0f172a;
+  --color-card: #1e293b;
+  --color-card-foreground: #e2e8f0;
+  --color-border: #334155;
+  --color-foreground: #e2e8f0;
+  --color-muted-foreground: #94a3b8;
+
+  /* Semantic */
+  --color-primary: #6366f1;
+  --color-success: #22c55e;
+  --color-warning: #f59e0b;
+  --color-error: #ef4444;
+
+  /* Radius: 12px cards, 8px buttons */
+  --radius-card: 12px;
+  --radius-button: 8px;
+
+  /*
+   * 8px spacing system: Tailwind spacing scale is 0.25rem per unit.
+   * Use 2, 4, 6… for 8px, 16px, 24px… (e.g. p-2 = 8px, gap-4 = 16px).
+   */
+}
+
+@layer base {
+  *,
+  ::after,
+  ::before {
+    @apply border-border;
+  }
+
+  html {
+    color-scheme: dark;
+    @apply antialiased;
+  }
+
+  body {
+    @apply min-h-dvh bg-background font-sans text-base font-medium text-foreground;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-bold text-foreground;
+  }
+
+  /* Logs / errors: apply class `font-mono` or wrap in `.log-text` */
+  .log-text,
+  pre,
+  code {
+    @apply font-mono text-sm;
+  }
+}

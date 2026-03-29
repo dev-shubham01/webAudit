@@ -1,4 +1,4 @@
-import express from "express";
+  import express from "express";
 import cors from "cors";
 import { runScan } from "./features/scan/scan.service.js";
 
@@ -8,11 +8,12 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 app.use(cors());
 
-const SCAN_TIMEOUT_MS = 30_000;
+// Flipkart/large sites often take longer than 30s (Puppeteer + Lighthouse).
+// If this is too low, the endpoint throws and we return a generic 500.
+const SCAN_TIMEOUT_MS = 120_000;
 
 function normalizeAndValidateUrl(rawUrl) {
   if (typeof rawUrl !== "string") return null;
-
   const trimmed = rawUrl.trim();
   if (!trimmed) return null;
 
@@ -59,10 +60,18 @@ app.post("/scan", async (req, res) => {
     const scanResult = await withTimeout(runScan(normalizedUrl), SCAN_TIMEOUT_MS);
     return res.json(scanResult);
   } catch (error) {
-    void error;
+    console.error("Scan endpoint error:", error);
+
+    if (error?.message === "SCAN_TIMEOUT") {
+      return res.status(504).json({
+        success: false,
+        message: "Scan timed out",
+      });
+    }
+
     return res.status(500).json({
       success: false,
-      message: "Scan failed",
+      message: error?.message || "Scan failed",
     });
   }
 });
