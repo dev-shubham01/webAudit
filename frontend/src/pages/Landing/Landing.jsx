@@ -1,20 +1,29 @@
-import React from 'react'
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import {
   Search,
   TrendingUp,
-  FileSearch,
-  AlertCircle,
-  Sparkles,
 } from "lucide-react";
-import { Link } from 'react-router-dom';
-import Button from '../../components/ui/button';
-import Input from '../../components/ui/input';
-import { features } from '../../data/data';
-import { Card, CardContent } from '../../components/ui/card';
-
+import Button from "../../components/ui/button";
+import Input from "../../components/ui/input";
+import { features } from "../../data/data";
+import { Card, CardContent } from "../../components/ui/card";
+import { useScan } from "../../context/ScanContext.jsx";
 
 const Landing = () => {
-    
+  const [url, setUrl] = useState("");
+  const { executeScan, loading } = useScan();
+  const navigate = useNavigate();
+
+  const handleAnalyze = async () => {
+    try {
+      await executeScan(url);
+      navigate("/dashboard");
+    } catch {
+      /* error shown in ScanProvider banner */
+    }
+  };
+
   return (
     <div className="h-screen">
       <header className="border-b border-border">
@@ -52,14 +61,22 @@ const Landing = () => {
               <Input
                 type="url"
                 placeholder="https://yourwebsite.com"
+                value={url}
+                onChange={(e) => setUrl(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") void handleAnalyze();
+                }}
                 className="h-14 w-full rounded-xl border border-[#334155] bg-[#1E293B] pl-12 text-lg text-[#E2E8F0] placeholder:text-[#94A3B8] focus:border-[#6366F1] focus:ring-2 focus:ring-[#6366F1]"
               />
             </div>
-            <Link to="/dashboard">
-              <Button className="h-14 rounded-xl bg-[#6366F1] px-8 text-lg text-white hover:bg-[#5558E3] cursor-pointer">
-                Analyze Now
-              </Button>
-            </Link>
+            <Button
+              type="button"
+              disabled={loading}
+              onClick={() => void handleAnalyze()}
+              className="h-14 rounded-xl bg-[#6366F1] px-8 text-lg text-white hover:bg-[#5558E3] cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              Analyze Now
+            </Button>
           </div>
         </div>
       </section>
@@ -125,7 +142,6 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* Footer */}
       <footer className="border-t border-[#334155] py-8">
         <div className="mx-auto max-w-7xl px-8 text-center text-sm text-[#94A3B8]">
           © 2026 WebHealth. Built for developers who care about performance.
@@ -133,6 +149,6 @@ const Landing = () => {
       </footer>
     </div>
   );
-}
+};
 
-export default Landing
+export default Landing;
