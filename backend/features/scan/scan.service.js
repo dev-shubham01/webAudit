@@ -34,6 +34,13 @@ export async function runScan(url) {
     images: { total: 0, missingAlt: 0 },
     links: { total: 0 },
   };
+  const links = scanResult?.links || {
+    totalLinks: 0,
+    checkedLinks: 0,
+    brokenLinks: [],
+    successCount: 0,
+    unknownLinks: [],
+  };
 
   let score = null;
   try {
@@ -66,5 +73,7 @@ export async function runScan(url) {
     seo,
     performance,
     score,
+    insights: null,
+    links,
   };
 }

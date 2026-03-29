@@ -7,18 +7,21 @@ export function generateInsights({
   performance,
   consoleErrors,
   networkErrors,
+  links,
 }) {
   const insights = [];
   const consoles = Array.isArray(consoleErrors) ? consoleErrors : [];
   const networks = Array.isArray(networkErrors) ? networkErrors : [];
+  const normalizedLinks = links && typeof links === "object" ? links : null;
 
   if (seo && typeof seo === "object") {
     if (seo.metaDescription === "Missing") {
       insights.push({
         type: "SEO",
         severity: "high",
-        message: "Missing meta description",
-        fix: "Add a meta description under 160 characters with relevant keywords",
+        message: "Your page is missing a meta description.",
+        why: "Search engines may show random page text, which can reduce click-through rate.",
+        fix: "Add a concise meta description (about 120-160 characters) that clearly explains the page.",
       });
     }
 
@@ -28,15 +31,17 @@ export function generateInsights({
         insights.push({
           type: "SEO",
           severity: "high",
-          message: "No H1 tag found",
-          fix: "Add a single H1 tag to define page structure",
+          message: "No H1 heading was found on the page.",
+          why: "The H1 helps search engines and users understand the page's main topic.",
+          fix: "Add one clear H1 near the top of the page that describes the primary content.",
         });
       } else if (h1Count > 1) {
         insights.push({
           type: "SEO",
           severity: "medium",
-          message: "Multiple H1 tags detected",
-          fix: "Use only one H1 for better SEO",
+          message: "Multiple H1 headings were detected.",
+          why: "Too many H1s can dilute content hierarchy and make topic signals less clear.",
+          fix: "Keep one primary H1 and convert additional H1s to H2/H3 subheadings.",
         });
       }
     }
@@ -46,8 +51,9 @@ export function generateInsights({
       insights.push({
         type: "SEO",
         severity: "medium",
-        message: "Some images are missing alt attributes",
-        fix: "Add descriptive alt text to all images",
+        message: "Some images are missing alt text.",
+        why: "Missing alt text hurts accessibility and removes image context for search engines.",
+        fix: "Add short, descriptive alt text for meaningful images and empty alt text for decorative ones.",
       });
     }
   }
@@ -59,8 +65,9 @@ export function generateInsights({
       insights.push({
         type: "Performance",
         severity: "medium",
-        message: "Largest Contentful Paint is slow",
-        fix: "Optimize large images and reduce render-blocking resources",
+        message: "Largest Contentful Paint (LCP) is slower than recommended.",
+        why: "A slow LCP delays when users see the main content and can increase bounce rate.",
+        fix: "Compress large media, preload the hero asset, and reduce render-blocking CSS/JS.",
       });
     }
 
@@ -69,8 +76,9 @@ export function generateInsights({
       insights.push({
         type: "Performance",
         severity: "medium",
-        message: "First Contentful Paint is slow",
-        fix: "Improve server response time and optimize critical CSS",
+        message: "First Contentful Paint (FCP) is taking too long.",
+        why: "Users wait longer before seeing any visual feedback from your page.",
+        fix: "Improve server response time, inline critical CSS, and defer non-critical scripts.",
       });
     }
 
@@ -79,8 +87,9 @@ export function generateInsights({
       insights.push({
         type: "Performance",
         severity: "medium",
-        message: "Layout shift detected",
-        fix: "Set size attributes for images and avoid dynamic content shifts",
+        message: "Noticeable layout shifts were detected.",
+        why: "Unexpected movement can cause accidental clicks and frustrate users.",
+        fix: "Set fixed width/height for media and reserve space for dynamic content like banners or ads.",
       });
     }
   }
@@ -89,8 +98,9 @@ export function generateInsights({
     insights.push({
       type: "Error",
       severity: "high",
-      message: "JavaScript errors detected",
-      fix: "Fix console errors to avoid broken functionality",
+      message: "JavaScript errors were found in the browser console.",
+      why: "Console errors can break features and create a poor user experience.",
+      fix: "Review stack traces, fix runtime errors, and re-test key user flows.",
     });
   }
 
@@ -98,8 +108,33 @@ export function generateInsights({
     insights.push({
       type: "Error",
       severity: "high",
-      message: "Failed network requests detected",
-      fix: "Check API endpoints and network responses",
+      message: "Some network requests failed during page load.",
+      why: "Failed requests can leave parts of the UI empty or non-functional.",
+      fix: "Check failed endpoints, status codes, CORS rules, and backend availability.",
+    });
+  }
+
+  const brokenLinks = Array.isArray(normalizedLinks?.brokenLinks)
+    ? normalizedLinks.brokenLinks
+    : [];
+  if (brokenLinks.length > 0) {
+    insights.push({
+      type: "SEO",
+      severity: "high",
+      message: "Broken links detected",
+      why: "Broken links hurt SEO and user experience",
+      fix: "Fix or remove links returning 4xx/5xx",
+    });
+  }
+
+  const totalLinks = Number(normalizedLinks?.totalLinks) || 0;
+  if (totalLinks >= 30) {
+    insights.push({
+      type: "Info",
+      severity: "low",
+      message: "This page contains many links.",
+      why: "A high link count can make link quality harder to maintain over time.",
+      fix: "Regularly validate important links and prioritize fixing broken destination URLs.",
     });
   }
 

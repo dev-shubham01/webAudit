@@ -1,5 +1,6 @@
 import puppeteer from "puppeteer";
 import { analyzeSEO } from "../seo/seo.service.js";
+import { analyzeLinks } from "../links/links.service.js";
 
 const GOTO_TIMEOUT_MS = 30000;
 const BODY_WAIT_MS = 10000;
@@ -11,6 +12,13 @@ const getPuppeteerFallback = () => ({
   consoleErrors: [],
   networkErrors: [],
   seo: null,
+  links: {
+    totalLinks: 0,
+    checkedLinks: 0,
+    brokenLinks: [],
+    successCount: 0,
+    unknownLinks: [],
+  },
 });
 
 /** Puppeteer 21+ removed `page.waitForTimeout`; keep explicit delays for render accuracy */
@@ -25,6 +33,13 @@ export async function runPuppeteerScan(url) {
   const networkErrors = [];
   let seo = null;
   let screenshot = null;
+  let links = {
+    totalLinks: 0,
+    checkedLinks: 0,
+    brokenLinks: [],
+    successCount: 0,
+    unknownLinks: [],
+  };
   let browser;
   const normalizedUrl =
     typeof url === "string" && /^https?:\/\//i.test(url.trim())
@@ -111,6 +126,7 @@ export async function runPuppeteerScan(url) {
     });
 
     seo = await analyzeSEO(page);
+    links = await analyzeLinks(page);
 
     try {
       const buffer = await page.screenshot({
@@ -141,5 +157,6 @@ export async function runPuppeteerScan(url) {
     consoleErrors,
     networkErrors,
     seo,
+    links,
   };
 }

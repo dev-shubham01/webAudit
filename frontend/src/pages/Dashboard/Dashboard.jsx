@@ -10,6 +10,7 @@ import {
   TrendingUp,
   Search,
   AlertCircle,
+  AlertTriangle,
   CheckCircle2,
   XCircle,
   Lightbulb,
@@ -136,6 +137,13 @@ function insightSeverityStyle(severity) {
   };
 }
 
+function severityEmoji(severity) {
+  const s = String(severity || "").toLowerCase();
+  if (s === "high") return "❌";
+  if (s === "medium") return "⚠️";
+  return "✅";
+}
+
 const cardShell =
   "rounded-xl border border-[#334155] bg-[#1E293B] shadow-lg shadow-black/25 transition-all duration-200 hover:border-indigo-500 hover:shadow-md";
 
@@ -212,6 +220,17 @@ export function Dashboard() {
   const networkErrors = Array.isArray(scanResult.networkErrors)
     ? scanResult.networkErrors
     : [];
+  const links = scanResult?.links ?? {
+    totalLinks: 0,
+    checkedLinks: 0,
+    brokenLinks: [],
+    successCount: 0,
+    unknownLinks: [],
+  };
+  const brokenLinks = Array.isArray(links?.brokenLinks) ? links.brokenLinks : [];
+  const brokenLinksCount = brokenLinks.length;
+  const totalLinksCount = Number(links?.totalLinks) || 0;
+  const successLinksCount = Number(links?.successCount) || 0;
 
   const overallScore = Number(score?.overallScore) || 0;
   const perfScore =
@@ -227,6 +246,7 @@ export function Dashboard() {
     performance,
     consoleErrors,
     networkErrors,
+    links,
   });
 
   const hasRealTitle =
@@ -435,7 +455,7 @@ export function Dashboard() {
           ) : (
             insights.map((item, i) => {
               const sev = insightSeverityStyle(item.severity);
-              const message = item.issue ?? item.message ?? "Issue";
+              const message = item.message ?? "Issue";
               return (
                 <div
                   key={i}
@@ -447,6 +467,9 @@ export function Dashboard() {
                         <span
                           className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium ${sev.badge}`}
                         >
+                          <span className="mr-1" aria-hidden>
+                            {severityEmoji(item.severity)}
+                          </span>
                           {String(item.severity || "low")}
                         </span>
                         <span className="text-xs font-medium uppercase tracking-wide text-[#64748B]">
@@ -456,6 +479,14 @@ export function Dashboard() {
                       <p className="mt-2 font-medium text-[#E2E8F0]">
                         {message}
                       </p>
+                      {item.why ? (
+                        <p className="mt-2 text-sm leading-relaxed text-[#94A3B8]">
+                          <span className="font-medium text-[#CBD5E1]">
+                            Why it matters:{" "}
+                          </span>
+                          {item.why}
+                        </p>
+                      ) : null}
                       {item.fix ? (
                         <p className="mt-2 text-sm leading-relaxed text-[#94A3B8]">
                           <span className="font-medium text-[#CBD5E1]">
@@ -576,7 +607,90 @@ export function Dashboard() {
         </CardContent>
       </Card>
 
-      {/* 6. Performance metrics */}
+      {/* 6. Links */}
+      <Card className={cardShell}>
+        <CardHeader className="border-b border-[#334155] pb-4">
+          <CardTitle className={sectionTitleClass}>Links</CardTitle>
+          <p className={sectionDescClass}>
+            Link health summary from checked page anchors
+          </p>
+        </CardHeader>
+        <CardContent className="space-y-5 pt-6">
+          <div className="grid gap-4 sm:grid-cols-3">
+            <div className="rounded-xl border border-[#334155] bg-[#0F172A]/60 px-4 py-4">
+              <p className="text-xs uppercase tracking-wide text-[#94A3B8]">
+                Total Links
+              </p>
+              <p className="mt-2 text-3xl font-bold tabular-nums text-[#E2E8F0]">
+                {totalLinksCount}
+              </p>
+            </div>
+            <div
+              className={`rounded-xl border px-4 py-4 ${
+                brokenLinksCount > 0
+                  ? "border-[#EF4444]/40 bg-[#EF4444]/10"
+                  : "border-[#334155] bg-[#0F172A]/60"
+              }`}
+            >
+              <p className="text-xs uppercase tracking-wide text-[#94A3B8]">
+                Broken Links
+              </p>
+              <p
+                className={`mt-2 text-3xl font-bold tabular-nums ${
+                  brokenLinksCount > 0 ? "text-[#FCA5A5]" : "text-[#E2E8F0]"
+                }`}
+              >
+                {brokenLinksCount}
+              </p>
+            </div>
+            <div className="rounded-xl border border-[#334155] bg-[#0F172A]/60 px-4 py-4">
+              <p className="text-xs uppercase tracking-wide text-[#94A3B8]">
+                Success Count
+              </p>
+              <p className="mt-2 text-3xl font-bold tabular-nums text-[#86EFAC]">
+                {successLinksCount}
+              </p>
+            </div>
+          </div>
+
+          {brokenLinksCount > 0 ? (
+            <div className="rounded-xl border border-[#EF4444]/40 bg-[#7F1D1D]/20 p-4">
+              <p className="mb-3 text-sm font-semibold text-[#FCA5A5]">
+                Broken link list
+              </p>
+              <ul className="space-y-2">
+                {brokenLinks.map((item, index) => {
+                  const urlText =
+                    typeof item?.url === "string" && item.url.trim()
+                      ? item.url
+                      : "Unknown URL";
+                  const statusText =
+                    item?.status == null ? "request failed" : `HTTP ${item.status}`;
+                  return (
+                    <li
+                      key={`${urlText}-${index}`}
+                      className="rounded-lg border border-[#EF4444]/30 bg-[#0F172A]/70 px-3 py-2 text-sm text-[#FECACA]"
+                    >
+                      <span className="font-medium text-[#FCA5A5]">
+                        {statusText}
+                      </span>
+                      <span className="mx-2 text-[#7F1D1D]">-</span>
+                      <span className="break-all">{urlText}</span>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2 rounded-xl border border-[#22C55E]/30 bg-[#22C55E]/5 px-4 py-4 text-[#86EFAC]">
+              <CheckCircle2 className="h-5 w-5 shrink-0 text-[#22C55E]" aria-hidden />
+              <p className="font-medium">✅ No broken links detected</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* 7. Performance metrics */}
       <Card className={cardShell}>
         <CardHeader className="border-b border-[#334155] pb-4">
           <CardTitle
@@ -624,6 +738,15 @@ export function Dashboard() {
                           : "bg-[#334155] text-[#94A3B8]"
                   }`}
                 >
+                  <span className="mr-1" aria-hidden>
+                    {row.rating.band === "good"
+                      ? "✅"
+                      : row.rating.band === "warn"
+                        ? "⚠️"
+                        : row.rating.band === "bad"
+                          ? "❌"
+                          : ""}
+                  </span>
                   {row.rating.label}
                 </span>
               </div>
@@ -632,7 +755,7 @@ export function Dashboard() {
         </CardContent>
       </Card>
 
-      {/* 7. Recent scans */}
+      {/* 8. Recent scans */}
       <Card className={cardShell}>
         <CardHeader className="border-b border-[#334155] pb-4">
           <CardTitle className={sectionTitleClass}>Recent scans</CardTitle>
@@ -696,6 +819,8 @@ function truncate(str, max) {
 }
 
 function SeoRow({ label, ok, okText, badText, detail }) {
+  const statusEmoji = ok ? "✅" : "❌";
+  const statusText = ok ? okText : badText;
   return (
     <div className="flex gap-3 rounded-xl border border-[#334155] bg-[#0F172A]/50 p-4 transition-all duration-200 hover:bg-[#0F172A]/70">
       <div className="shrink-0 pt-0.5">
@@ -706,12 +831,19 @@ function SeoRow({ label, ok, okText, badText, detail }) {
         )}
       </div>
       <div className="min-w-0 flex-1">
-        <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <span className="text-sm font-medium text-[#E2E8F0]">{label}</span>
           <span
-            className={`text-sm font-semibold ${ok ? "text-[#22C55E]" : "text-[#F87171]"}`}
+            className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold ${
+              ok
+                ? "bg-[#22C55E]/15 text-[#86EFAC]"
+                : "bg-[#EF4444]/15 text-[#FCA5A5]"
+            }`}
           >
-            {ok ? okText : badText}
+            <span className="mr-1" aria-hidden>
+              {statusEmoji}
+            </span>
+            {statusText}
           </span>
         </div>
         {detail ? (
