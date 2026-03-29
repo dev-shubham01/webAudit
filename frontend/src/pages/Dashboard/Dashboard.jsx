@@ -1,3 +1,5 @@
+import { useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Card,
   CardContent,
@@ -14,7 +16,9 @@ import {
   Gauge,
 } from "lucide-react";
 import { Badge } from "../../components/ui/badge";
+import Button from "../../components/ui/button";
 import { useScan } from "../../context/ScanContext.jsx";
+import { generateInsights } from "../../utils/generateInsights.js";
 
 /* Hero + KPI bands: green 90+, yellow 70–89, red under 70 */
 function scoreBand(score) {
@@ -133,19 +137,79 @@ function insightSeverityStyle(severity) {
 }
 
 const cardShell =
-  "rounded-xl border border-[#334155] bg-[#1E293B] shadow-lg shadow-black/25";
+  "rounded-xl border border-[#334155] bg-[#1E293B] shadow-lg shadow-black/25 transition-all duration-200 hover:border-indigo-500 hover:shadow-md";
+
+/** Section titles inside cards — slightly larger, muted slate for hierarchy */
+const sectionTitleClass =
+  "text-xl font-semibold tracking-tight text-[#E2E8F0]";
+const sectionDescClass = "text-sm text-[#94A3B8]";
 
 export function Dashboard() {
-  const { scanResult, scannedUrl, scannedAt } = useScan();
+  const { scanResult, scannedUrl, scannedAt, scanGeneration } = useScan();
+  const navigate = useNavigate();
+  const resultsAnchorRef = useRef(null);
+  const lastScrolledGenRef = useRef(0);
 
-  const score = scanResult?.score;
+  useEffect(() => {
+    if (!scanResult || scanGeneration < 1) return;
+    if (lastScrolledGenRef.current === scanGeneration) return;
+    lastScrolledGenRef.current = scanGeneration;
+    const id = requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        resultsAnchorRef.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      });
+    });
+    return () => cancelAnimationFrame(id);
+  }, [scanResult, scanGeneration]);
+
+  if (!scanResult) {
+    return (
+      <div className="space-y-8 pb-8">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight text-white">
+            Dashboard
+          </h1>
+          <p className={`mt-2 ${sectionDescClass}`}>
+            Your scan results will appear here
+          </p>
+        </div>
+        <Card className={cardShell}>
+          <CardContent className="flex flex-col items-center px-6 py-16 text-center">
+            <Search
+              className="mb-4 h-12 w-12 text-[#64748B]"
+              aria-hidden
+            />
+            <p className="max-w-md text-lg font-medium text-[#E2E8F0]">
+              No scan results yet
+            </p>
+            <p className={`mt-2 max-w-md text-sm leading-relaxed ${sectionDescClass}`}>
+              Enter a URL on the home page or in the header to analyze performance,
+              SEO, and errors. Results will show up here when the run finishes.
+            </p>
+            <Button
+              type="button"
+              onClick={() => navigate("/")}
+              className="mt-8 rounded-lg bg-[#6366F1] px-6 text-white hover:bg-[#5558E3]"
+            >
+              Start a scan
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  const score = scanResult.score;
   const breakdown = score?.breakdown;
-  const seo = scanResult?.seo;
-  const performance = scanResult?.performance;
-  const consoleErrors = Array.isArray(scanResult?.consoleErrors)
+  const seo = scanResult.seo;
+  const performance = scanResult.performance;
+  const consoleErrors = Array.isArray(scanResult.consoleErrors)
     ? scanResult.consoleErrors
     : [];
-  const networkErrors = Array.isArray(scanResult?.networkErrors)
+  const networkErrors = Array.isArray(scanResult.networkErrors)
     ? scanResult.networkErrors
     : [];
 
@@ -158,7 +222,12 @@ export function Dashboard() {
   const heroBand = scoreBand(overallScore);
   const hero = bandStyles[heroBand];
 
-  const insights = Array.isArray(score?.insights) ? score.insights : [];
+  const insights = generateInsights({
+    seo,
+    performance,
+    consoleErrors,
+    networkErrors,
+  });
 
   const hasRealTitle =
     typeof seo?.title === "string" &&
@@ -222,14 +291,27 @@ export function Dashboard() {
   const clsR = vitalRating("cls", cls);
 
   return (
-    <div className="space-y-10 pb-8">
-      <div>
-        <h1 className="text-2xl font-bold text-white">Dashboard</h1>
-        <p className="mt-1 text-sm text-[#94A3B8]">
-          Results for your latest scan
-        </p>
+    <div className="space-y-8 pb-8">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight text-white">
+            Dashboard
+          </h1>
+          <p className={`mt-2 ${sectionDescClass}`}>
+            Results for your latest scan
+          </p>
+        </div>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => navigate("/")}
+          className="h-10 shrink-0 border-[#334155] text-[#E2E8F0] hover:bg-[#1E293B]"
+        >
+          Scan another website
+        </Button>
       </div>
 
+      <div ref={resultsAnchorRef} className="scroll-mt-6 space-y-8">
       {/* 1. Hero score */}
       <Card
         className={`${cardShell} overflow-hidden ring-1 ${hero.ring} ${hero.border}`}
@@ -257,8 +339,32 @@ export function Dashboard() {
         </CardContent>
       </Card>
 
+      <Card className={cardShell}>
+        <CardHeader className="border-b border-[#334155] pb-4">
+          <CardTitle className={sectionTitleClass}>Website Preview</CardTitle>
+        </CardHeader>
+        <CardContent className="pt-6">
+          {scanResult?.screenshot ? (
+            <div className="max-h-[min(70vh,720px)] w-full scroll-smooth overflow-auto rounded-lg border border-[#334155] bg-[#0F172A] p-2">
+              <img
+                src={`data:image/png;base64,${scanResult.screenshot}`}
+                alt="Website Preview"
+                className="w-full rounded-xl"
+              />
+            </div>
+          ) : (
+            <div className="rounded-lg border border-dashed border-[#334155] bg-[#0F172A]/60 px-4 py-6 text-center">
+              <p className="text-sm text-[#94A3B8]">Preview not available</p>
+              <p className="mt-1 text-xs text-[#64748B]">
+                (Some websites block automated rendering)
+              </p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       {/* 2. KPI cards */}
-      <div className="grid gap-6 md:grid-cols-3">
+      <div className="grid gap-8 md:grid-cols-3">
         {[
           {
             title: "Performance",
@@ -310,15 +416,17 @@ export function Dashboard() {
       {/* 3. Insights */}
       <Card className={cardShell}>
         <CardHeader className="border-b border-[#334155] pb-4">
-          <CardTitle className="flex items-center gap-2 text-lg text-white">
-            <Lightbulb className="h-5 w-5 text-[#6366F1]" />
+          <CardTitle
+            className={`flex items-center gap-2 ${sectionTitleClass}`}
+          >
+            <Lightbulb className="h-5 w-5 shrink-0 text-[#6366F1]" />
             Insights
           </CardTitle>
-          <p className="text-sm text-[#94A3B8]">
+          <p className={sectionDescClass}>
             Prioritized actions to improve your site
           </p>
         </CardHeader>
-        <CardContent className="space-y-3 pt-6">
+        <CardContent className="space-y-4 pt-6">
           {insights.length === 0 ? (
             <p className="rounded-lg border border-[#334155] bg-[#0F172A]/80 px-4 py-6 text-center text-sm text-[#94A3B8]">
               No issues flagged for this scan. Keep monitoring as you ship
@@ -331,7 +439,7 @@ export function Dashboard() {
               return (
                 <div
                   key={i}
-                  className={`rounded-xl border border-[#334155] bg-[#0F172A]/60 pl-4 ${sev.border} border-l-4`}
+                  className={`rounded-xl border border-[#334155] bg-[#0F172A]/60 pl-4 transition-all duration-200 ${sev.border} border-l-4 hover:bg-[#0F172A]/90`}
                 >
                   <div className="flex flex-col gap-2 p-4 sm:flex-row sm:items-start sm:justify-between">
                     <div className="min-w-0 flex-1">
@@ -368,13 +476,13 @@ export function Dashboard() {
       {/* 4. SEO details */}
       <Card className={cardShell}>
         <CardHeader className="border-b border-[#334155] pb-4">
-          <CardTitle className="text-lg text-white">SEO snapshot</CardTitle>
-          <p className="text-sm text-[#94A3B8]">
+          <CardTitle className={sectionTitleClass}>SEO snapshot</CardTitle>
+          <p className={sectionDescClass}>
             Quick checks from the crawled page
           </p>
         </CardHeader>
         <CardContent className="pt-6">
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-6 sm:grid-cols-2">
             <SeoRow
               label="Title"
               ok={hasRealTitle}
@@ -424,8 +532,8 @@ export function Dashboard() {
       {/* 5. Errors */}
       <Card className={cardShell}>
         <CardHeader className="border-b border-[#334155] pb-4">
-          <CardTitle className="text-lg text-white">Errors</CardTitle>
-          <p className="text-sm text-[#94A3B8]">
+          <CardTitle className={sectionTitleClass}>Errors</CardTitle>
+          <p className={sectionDescClass}>
             Console and failed network responses
           </p>
         </CardHeader>
@@ -439,13 +547,13 @@ export function Dashboard() {
               </span>
             </div>
           ) : (
-            <ul className="space-y-3">
+            <ul className="space-y-4">
               {errorItems.map((item) => {
                 const st = insightSeverityStyle(item.severity);
                 return (
                   <li
                     key={item.key}
-                    className="flex gap-3 rounded-xl border border-[#334155] bg-[#0F172A]/60 p-4"
+                    className="flex gap-3 rounded-xl border border-[#334155] bg-[#0F172A]/60 p-4 transition-all duration-200 hover:bg-[#0F172A]/90"
                   >
                     <span
                       className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${st.dot}`}
@@ -471,11 +579,13 @@ export function Dashboard() {
       {/* 6. Performance metrics */}
       <Card className={cardShell}>
         <CardHeader className="border-b border-[#334155] pb-4">
-          <CardTitle className="flex items-center gap-2 text-lg text-white">
-            <Gauge className="h-5 w-5 text-[#6366F1]" />
+          <CardTitle
+            className={`flex items-center gap-2 ${sectionTitleClass}`}
+          >
+            <Gauge className="h-5 w-5 shrink-0 text-[#6366F1]" />
             Performance metrics
           </CardTitle>
-          <p className="text-sm text-[#94A3B8]">
+          <p className={sectionDescClass}>
             Core Web Vitals thresholds (lab)
           </p>
         </CardHeader>
@@ -525,7 +635,10 @@ export function Dashboard() {
       {/* 7. Recent scans */}
       <Card className={cardShell}>
         <CardHeader className="border-b border-[#334155] pb-4">
-          <CardTitle className="text-lg text-white">Recent scans</CardTitle>
+          <CardTitle className={sectionTitleClass}>Recent scans</CardTitle>
+          <p className={sectionDescClass}>
+            Latest scan shown below — run again from the header to refresh
+          </p>
         </CardHeader>
         <CardContent className="pt-6">
           <div className="overflow-x-auto">
@@ -570,6 +683,7 @@ export function Dashboard() {
           </div>
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 }
@@ -583,7 +697,7 @@ function truncate(str, max) {
 
 function SeoRow({ label, ok, okText, badText, detail }) {
   return (
-    <div className="flex gap-3 rounded-xl border border-[#334155] bg-[#0F172A]/50 p-4">
+    <div className="flex gap-3 rounded-xl border border-[#334155] bg-[#0F172A]/50 p-4 transition-all duration-200 hover:bg-[#0F172A]/70">
       <div className="shrink-0 pt-0.5">
         {ok ? (
           <CheckCircle2 className="h-5 w-5 text-[#22C55E]" aria-hidden />

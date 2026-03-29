@@ -11,7 +11,7 @@ const Root=()=>{
         <Sidebar />
         <div className="flex flex-1 flex-col overflow-hidden">
           <Navbar />
-          <main className="flex-1 overflow-y-auto p-8">
+          <main className="flex-1 scroll-smooth overflow-y-auto p-8">
             <div className="mx-auto max-w-[1440px]">
               <Outlet />
             </div>

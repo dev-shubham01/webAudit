@@ -60,7 +60,7 @@ export async function runScan(url) {
   }
 
   return {
-    screenshot: scanResult?.screenshot || "",
+    screenshot: scanResult?.screenshot ?? null,
     consoleErrors,
     networkErrors,
     seo,

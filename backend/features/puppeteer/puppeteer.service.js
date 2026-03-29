@@ -1,9 +1,10 @@
 import puppeteer from "puppeteer";
 import { analyzeSEO } from "../seo/seo.service.js";
 
-const NAVIGATION_TIMEOUT_MS = 30000;
-const DOM_WAIT_TIMEOUT_MS = 10000;
-const EXTRA_WAIT_MS = 3000;
+const GOTO_TIMEOUT_MS = 30000;
+const BODY_WAIT_MS = 10000;
+const POST_LOAD_WAIT_MS = 3000;
+const POST_SCROLL_WAIT_MS = 2000;
 
 const getPuppeteerFallback = () => ({
   screenshot: null,
@@ -11,6 +12,13 @@ const getPuppeteerFallback = () => ({
   networkErrors: [],
   seo: null,
 });
+
+/** Puppeteer 21+ removed `page.waitForTimeout`; keep explicit delays for render accuracy */
+function delay(ms) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
 
 export async function runPuppeteerScan(url) {
   const consoleErrors = [];
@@ -32,6 +40,11 @@ export async function runPuppeteerScan(url) {
     });
 
     const page = await browser.newPage();
+
+    await page.setViewport({
+      width: 1440,
+      height: 900,
+    });
 
     page.on("console", (msg) => {
       if (msg.type() === "error") {
@@ -55,17 +68,18 @@ export async function runPuppeteerScan(url) {
     try {
       await page.goto(normalizedUrl, {
         waitUntil: "domcontentloaded",
-        timeout: NAVIGATION_TIMEOUT_MS,
+        timeout: GOTO_TIMEOUT_MS,
       });
     } catch (navigationError) {
       console.error("Navigation failed:", navigationError);
       return getPuppeteerFallback();
     }
-    await page.waitForSelector("body", { timeout: DOM_WAIT_TIMEOUT_MS }).catch(() => {});
+
+    await page.waitForSelector("body", { timeout: BODY_WAIT_MS }).catch(() => {});
     if (typeof page.waitForTimeout === "function") {
-      await page.waitForTimeout(EXTRA_WAIT_MS);
+      await page.waitForTimeout(POST_LOAD_WAIT_MS);
     } else {
-      await new Promise((resolve) => setTimeout(resolve, EXTRA_WAIT_MS));
+      await delay(POST_LOAD_WAIT_MS);
     }
 
     const title = await page.title();
@@ -74,16 +88,39 @@ export async function runPuppeteerScan(url) {
       console.log("Page not loaded properly");
     }
 
+    await page.evaluate(async () => {
+      await new Promise((resolve) => {
+        let totalHeight = 0;
+        const distance = 200;
+        const timer = setInterval(() => {
+          window.scrollBy(0, distance);
+          totalHeight += distance;
+
+          if (totalHeight >= document.body.scrollHeight) {
+            clearInterval(timer);
+            resolve();
+          }
+        }, 100);
+      });
+    });
+
+    await delay(POST_SCROLL_WAIT_MS);
+
+    await page.evaluate(() => {
+      document.body.classList.add("puppeteer-ready");
+    });
+
     seo = await analyzeSEO(page);
 
     try {
-      console.log("Taking screenshot...");
-      screenshot = await page.screenshot({
-        encoding: "base64",
+      const buffer = await page.screenshot({
+        type: "png",
         fullPage: true,
       });
+      screenshot = buffer.toString("base64");
+      console.log("Screenshot captured:", screenshot.length);
     } catch (screenshotError) {
-      console.error("Screenshot failed:", screenshotError);
+      console.error("Screenshot failed:", screenshotError?.message);
       screenshot = null;
     }
   } catch (error) {

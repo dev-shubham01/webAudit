@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   Search,
@@ -10,10 +10,17 @@ import { features } from "../../data/data";
 import { Card, CardContent } from "../../components/ui/card";
 import { useScan } from "../../context/ScanContext.jsx";
 
+const URL_HELPER =
+  "Enter any website URL to analyze performance, SEO, and errors";
+
 const Landing = () => {
   const [url, setUrl] = useState("");
-  const { executeScan, loading } = useScan();
+  const { executeScan, loading, scannedUrl } = useScan();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (scannedUrl) setUrl(scannedUrl);
+  }, [scannedUrl]);
 
   const handleAnalyze = async () => {
     try {
@@ -55,28 +62,33 @@ const Landing = () => {
             real-time. Get AI-powered insights and automatic fixes to optimize
             your web presence.
           </p>
-          <div className="mx-auto flex max-w-2xl items-center gap-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#94A3B8]" />
-              <Input
-                type="url"
-                placeholder="https://yourwebsite.com"
-                value={url}
-                onChange={(e) => setUrl(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") void handleAnalyze();
-                }}
-                className="h-14 w-full rounded-xl border border-[#334155] bg-[#1E293B] pl-12 text-lg text-[#E2E8F0] placeholder:text-[#94A3B8] focus:border-[#6366F1] focus:ring-2 focus:ring-[#6366F1]"
-              />
+          <div className="mx-auto flex w-full max-w-2xl flex-col gap-2">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+              <div className="relative flex-1">
+                <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#94A3B8]" />
+                <Input
+                  type="url"
+                  placeholder="https://yourwebsite.com"
+                  value={url}
+                  onChange={(e) => setUrl(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") void handleAnalyze();
+                  }}
+                  className="h-14 w-full rounded-xl border border-[#334155] bg-[#1E293B] pl-12 text-lg text-[#E2E8F0] placeholder:text-[#94A3B8] focus:border-[#6366F1] focus:ring-2 focus:ring-[#6366F1]"
+                />
+              </div>
+              <Button
+                type="button"
+                disabled={loading}
+                onClick={() => void handleAnalyze()}
+                className="h-14 shrink-0 rounded-xl bg-[#6366F1] px-8 text-lg text-white hover:bg-[#5558E3] cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                Analyze Now
+              </Button>
             </div>
-            <Button
-              type="button"
-              disabled={loading}
-              onClick={() => void handleAnalyze()}
-              className="h-14 rounded-xl bg-[#6366F1] px-8 text-lg text-white hover:bg-[#5558E3] cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              Analyze Now
-            </Button>
+            <p className="text-center text-sm leading-snug text-[#64748B]">
+              {URL_HELPER}
+            </p>
           </div>
         </div>
       </section>

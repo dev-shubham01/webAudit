@@ -16,6 +16,8 @@ export function ScanProvider({ children }) {
   const [scanResult, setScanResult] = useState(null);
   const [scannedUrl, setScannedUrl] = useState(null);
   const [scannedAt, setScannedAt] = useState(null);
+  /** Increments on each successful scan so the dashboard can scroll to results */
+  const [scanGeneration, setScanGeneration] = useState(0);
 
   const clearError = useCallback(() => setError(null), []);
 
@@ -40,6 +42,7 @@ export function ScanProvider({ children }) {
       setScanResult(result);
       setScannedUrl(normalized);
       setScannedAt(new Date().toISOString());
+      setScanGeneration((g) => g + 1);
       return result;
     } catch (e) {
       const msg =
@@ -62,6 +65,7 @@ export function ScanProvider({ children }) {
       scannedUrl,
       setScannedUrl,
       scannedAt,
+      scanGeneration,
       executeScan,
       clearError,
     }),
@@ -71,6 +75,7 @@ export function ScanProvider({ children }) {
       scanResult,
       scannedUrl,
       scannedAt,
+      scanGeneration,
       executeScan,
       clearError,
     ],
@@ -79,13 +84,14 @@ export function ScanProvider({ children }) {
   return (
     <ScanContext.Provider value={value}>
       {loading && (
-        <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#0F172A]/95 text-[#E2E8F0]">
+        <div
+          className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#0F172A]/60 backdrop-blur-md"
+          aria-busy="true"
+          aria-live="polite"
+        >
           <div className="h-10 w-10 animate-spin rounded-full border-2 border-[#334155] border-t-[#6366F1]" />
-          <p className="mt-6 text-lg font-medium">
-            Analyzing your website…
-          </p>
-          <p className="mt-2 max-w-sm text-center text-sm text-[#94A3B8]">
-            This may take up to a couple of minutes.
+          <p className="mt-6 text-lg font-medium text-[#E2E8F0]">
+            Analyzing...
           </p>
         </div>
       )}
