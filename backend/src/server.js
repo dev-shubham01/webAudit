@@ -1,6 +1,8 @@
-  import express from "express";
+import express from "express";
 import cors from "cors";
-import { runScan } from "./features/scan/scan.service.js";
+import { runScan } from "../features/scan/scan.service.js";
+import { normalizeAndValidateUrl } from "./utils/urls.js";
+import reportsRouter from "./jobs/job.routes.js";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -8,29 +10,16 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 app.use(cors());
 
-// Flipkart/large sites often take longer than 30s (Puppeteer + Lighthouse).
-// If this is too low, the endpoint throws and we return a generic 500.
+app.get("/", (req, res) => {
+  res.send("Server running");
+});
+
+// New job-based crawl/report API (see docs/ARCHITECTURE.md §3).
+app.use("/api/reports", reportsRouter);
+
+// Legacy single-page scan endpoint, kept until the frontend Dashboard
+// migrates to /api/reports in Phase 1 (see docs/ROADMAP.md).
 const SCAN_TIMEOUT_MS = 120_000;
-
-function normalizeAndValidateUrl(rawUrl) {
-  if (typeof rawUrl !== "string") return null;
-  const trimmed = rawUrl.trim();
-  if (!trimmed) return null;
-
-  const withProtocol = /^https?:\/\//i.test(trimmed)
-    ? trimmed
-    : `https://${trimmed}`;
-
-  try {
-    const parsed = new URL(withProtocol);
-    if (!["http:", "https:"].includes(parsed.protocol)) {
-      return null;
-    }
-    return parsed.toString();
-  } catch (_error) {
-    return null;
-  }
-}
 
 function withTimeout(promise, timeoutMs) {
   return Promise.race([
@@ -41,14 +30,9 @@ function withTimeout(promise, timeoutMs) {
   ]);
 }
 
-app.get("/", (req, res) => {
-  res.send("Server running");
-});
-
 app.post("/scan", async (req, res) => {
   try {
-    const { url } = req.body;
-    const normalizedUrl = normalizeAndValidateUrl(url);
+    const normalizedUrl = normalizeAndValidateUrl(req.body?.url);
 
     if (!normalizedUrl) {
       return res.status(400).json({
