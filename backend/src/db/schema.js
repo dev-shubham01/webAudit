@@ -50,6 +50,14 @@ function createSchema(database) {
       data TEXT NOT NULL
     );
     CREATE INDEX IF NOT EXISTS idx_crawl_pages_run ON crawl_pages (crawl_run_id);
+
+    CREATE TABLE IF NOT EXISTS edges (
+      crawl_run_id INTEGER NOT NULL,
+      from_url TEXT NOT NULL,
+      to_url TEXT NOT NULL,
+      PRIMARY KEY (crawl_run_id, from_url, to_url)
+    );
+    CREATE INDEX IF NOT EXISTS idx_edges_run ON edges (crawl_run_id);
   `);
 }
 

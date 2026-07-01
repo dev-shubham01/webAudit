@@ -713,16 +713,29 @@ function categoryIntelligence(mlBundle) {
 /**
  * Build all 8 categories from crawled pages. `edges`, `securityFindings`,
  * `lighthouseSummary`, and `mlBundle` are optional inputs from later phases
- * (Phase 2/4/3/6) — categories degrade gracefully to fewer issues/null scores
- * until those phases populate them, per docs/ROADMAP.md.
+ * (Phase 3/4/6) — categories degrade gracefully to fewer issues/null scores
+ * until those phases populate them, per docs/ROADMAP.md. `externalBrokenLinks`
+ * (Phase 2) are broken links found by checking outlinks that weren't
+ * themselves crawled (external links, or links beyond depth/page limits).
  */
 export function buildCategories(
   pages,
-  { edges = [], siteLevel, startUrl, securityFindings = null, lighthouseSummary = null, mlBundle = null },
+  {
+    edges = [],
+    siteLevel,
+    startUrl,
+    securityFindings = null,
+    lighthouseSummary = null,
+    mlBundle = null,
+    externalBrokenLinks = [],
+  },
 ) {
-  const issuesBroken = pages
-    .filter((p) => (typeof p.status === "number" && p.status >= 400) || p.status === "error")
-    .map((p) => ({ url: p.url, status: String(p.status) }));
+  const issuesBroken = [
+    ...pages
+      .filter((p) => (typeof p.status === "number" && p.status >= 400) || p.status === "error")
+      .map((p) => ({ url: p.url, status: String(p.status) })),
+    ...externalBrokenLinks.map((l) => ({ url: l.url, status: String(l.status) })),
+  ];
 
   const issuesRedirects = pages
     .filter((p) => (p.redirectChainLength || 0) > 0)

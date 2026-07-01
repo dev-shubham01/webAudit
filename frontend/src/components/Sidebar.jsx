@@ -1,26 +1,36 @@
 import { Link, useLocation } from "react-router";
-import {
-  LayoutDashboard,
-  FileText,
-  Activity,
-  GitCompare,
-  Shield,
-  Settings,
-  User,
-} from "lucide-react";
+import { LayoutDashboard, FileText, Activity, Link2, Repeat, AlertOctagon } from "lucide-react";
 import { Avatar, AvatarFallback } from "./ui/avatar";
+import { Badge } from "./ui/badge";
+import { useReport } from "../context/ReportContext.jsx";
 
-const navItems = [
-  { path: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { path: "/content", label: "Content", icon: FileText },
-  { path: "/monitoring", label: "Monitoring", icon: Activity },
-  { path: "/compare", label: "Compare", icon: GitCompare },
-  { path: "/security", label: "Security", icon: Shield },
-  { path: "/settings", label: "Settings", icon: Settings },
+// Section grouping mirrors the reference's nav (Audit Overview / Crawl
+// Analysis / Content & SEO / Visualizations). Only sections with at least
+// one built page are shown; more items join as later phases ship
+// (Page Speed, Security & Headers, Content Insights, Tech Detection, etc.)
+// — see docs/ROADMAP.md.
+const NAV_SECTIONS = [
+  {
+    label: "Audit Overview",
+    items: [
+      { path: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+      { path: "/issues", label: "Site Audit", icon: AlertOctagon, badge: "issues" },
+    ],
+  },
+  {
+    label: "Crawl Analysis",
+    items: [
+      { path: "/links", label: "Link Explorer", icon: Link2 },
+      { path: "/redirects", label: "Redirects", icon: Repeat },
+      { path: "/content", label: "On-Page SEO", icon: FileText },
+    ],
+  },
 ];
 
 export function Sidebar() {
   const location = useLocation();
+  const { data } = useReport();
+  const issueCount = data?.data?.categories?.reduce((n, c) => n + (c.issues?.length || 0), 0) ?? 0;
 
   return (
     <aside className="flex w-60 flex-col border-r border-[#334155] bg-[#0F172A]">
@@ -33,26 +43,39 @@ export function Sidebar() {
         </Link>
       </div>
 
-      <nav className="flex-1 space-y-1 p-4">
-        {navItems.map((item) => {
-          const Icon = item.icon;
-          const isActive = location.pathname.startsWith(item.path);
+      <nav className="flex-1 space-y-4 overflow-y-auto p-4">
+        {NAV_SECTIONS.map((section) => (
+          <div key={section.label}>
+            <p className="mb-1 px-3 text-xs font-semibold uppercase tracking-wide text-[#64748B]">
+              {section.label}
+            </p>
+            <div className="space-y-1">
+              {section.items.map((item) => {
+                const Icon = item.icon;
+                const isActive = location.pathname.startsWith(item.path);
+                const badgeCount = item.badge === "issues" ? issueCount : 0;
 
-          return (
-            <Link
-              key={item.path}
-              to={item.path}
-              className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-colors ${
-                isActive
-                  ? "bg-[#6366F1] text-white"
-                  : "text-[#94A3B8] hover:bg-[#1E293B] hover:text-[#E2E8F0]"
-              }`}
-            >
-              <Icon className="h-5 w-5" />
-              <span>{item.label}</span>
-            </Link>
-          );
-        })}
+                return (
+                  <Link
+                    key={item.path}
+                    to={item.path}
+                    className={`flex items-center justify-between gap-3 rounded-lg px-3 py-2 transition-colors ${
+                      isActive
+                        ? "bg-[#6366F1] text-white"
+                        : "text-[#94A3B8] hover:bg-[#1E293B] hover:text-[#E2E8F0]"
+                    }`}
+                  >
+                    <span className="flex items-center gap-3">
+                      <Icon className="h-5 w-5" />
+                      <span>{item.label}</span>
+                    </span>
+                    {badgeCount > 0 && <Badge variant="destructive">{badgeCount}</Badge>}
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        ))}
       </nav>
 
       <div className="border-t border-[#334155] p-4">

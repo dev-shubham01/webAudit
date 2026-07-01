@@ -3,6 +3,9 @@ import Root from "../layout/Root";
 import Landing from "../pages/Landing/Landing";
 import DashboardGate from "../pages/Dashboard/DashboardGate.jsx";
 import ContentGate from "../pages/Content/ContentGate.jsx";
+import LinksGate from "../pages/Links/LinksGate.jsx";
+import RedirectsGate from "../pages/Redirects/RedirectsGate.jsx";
+import IssuesGate from "../pages/Issues/IssuesGate.jsx";
 import ReportsLab from "../pages/ReportsLab/ReportsLab.jsx";
 const router = createBrowserRouter([
   {
@@ -12,6 +15,9 @@ const router = createBrowserRouter([
         {index:true, Component: Landing},
         { path: "/dashboard", Component: DashboardGate },
         { path: "/content", Component: ContentGate },
+        { path: "/links", Component: LinksGate },
+        { path: "/redirects", Component: RedirectsGate },
+        { path: "/issues", Component: IssuesGate },
         { path: "/lab", Component: ReportsLab }
     ]
   },

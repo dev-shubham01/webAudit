@@ -87,6 +87,18 @@ export function insertCrawlPages(crawlRunId, pages) {
   insertMany(pages);
 }
 
+export function insertEdges(crawlRunId, edges) {
+  if (!edges.length) return;
+  const db = getDb();
+  const insert = db.prepare(
+    `INSERT OR IGNORE INTO edges (crawl_run_id, from_url, to_url) VALUES (?, ?, ?)`,
+  );
+  const insertMany = db.transaction((rows) => {
+    for (const [from, to] of rows) insert.run(crawlRunId, from, to);
+  });
+  insertMany(edges);
+}
+
 export function getReportById(id) {
   const db = getDb();
   const row = db.prepare(`SELECT * FROM reports WHERE id = ?`).get(id);

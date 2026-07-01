@@ -1,4 +1,5 @@
 import { buildCategories } from "./categories.js";
+import { computeInDegree } from "../graph/linkGraph.js";
 
 function median(values) {
   if (!values.length) return 0;
@@ -26,43 +27,57 @@ function statusClass(status) {
   return "other";
 }
 
-function toLinkRecord(p) {
+function toLinkRecord(p, inDegree) {
   return {
     url: p.url,
     finalUrl: p.finalUrl,
     status: p.status,
     depth: p.depth,
+    contentType: p.contentType || "",
     title: p.seo?.title || "",
     metaDescription: p.seo?.metaDescription || "",
     metaDescriptionLen: p.seo?.metaDescriptionLen || 0,
     canonicalUrl: p.seo?.canonicalUrl || "",
     h1Count: p.seo?.h1Count ?? 0,
+    h1Text: p.seo?.h1Text || "",
     wordCount: p.seo?.wordCount ?? 0,
     readingLevel: p.seo?.readingLevel ?? 0,
+    contentHtmlRatio: p.seo?.contentHtmlRatio ?? 0,
+    topKeywords: p.seo?.topKeywords || [],
     noindex: Boolean(p.seo?.noindex),
     viewportPresent: Boolean(p.seo?.viewportPresent),
     hasSchema: Boolean(p.seo?.hasSchema),
     imagesTotal: p.seo?.imagesTotal ?? 0,
     imagesWithoutAlt: p.seo?.imagesWithoutAlt ?? 0,
     ogTitle: p.seo?.ogTitle || "",
+    ogDescription: p.seo?.ogDescription || "",
+    ogImage: p.seo?.ogImage || "",
     twitterCard: p.seo?.twitterCard || "",
     techStack: p.techStack || [],
     responseTimeMs: p.responseTimeMs,
     contentLength: p.contentLength,
     redirectChainLength: p.redirectChainLength,
+    headers: p.headers || {},
+    pageAnalysis: p.pageAnalysis || null,
     warnings: p.pageAnalysis?.warnings || [],
     outlinksCount: p.outlinksCount,
+    inlinksCount: inDegree.get(p.finalUrl) ?? inDegree.get(p.url) ?? 0,
     error: p.error,
   };
 }
 
 /**
  * Assemble the full report payload from a completed crawl. Mirrors the
- * shape reporting/builder.py's run_simple_report() produces, trimmed to
- * what Phase 1's Overview/Content pages read (docs/FEATURES.md).
+ * shape reporting/builder.py's run_simple_report() produces, extended in
+ * Phase 2 with the internal link graph and outlink-checking results
+ * (docs/FEATURES.md).
  */
-export function buildReport({ startUrl, pages, crawlTimeS, siteLevel }) {
-  const categories = buildCategories(pages, { siteLevel, startUrl });
+export function buildReport({ startUrl, pages, crawlTimeS, siteLevel, edges = [], externalLinkChecks = [] }) {
+  const inDegree = computeInDegree(edges);
+  const externalBrokenLinks = externalLinkChecks.filter((l) => l.result === "broken");
+  const unknownLinks = externalLinkChecks.filter((l) => l.result === "unknown");
+
+  const categories = buildCategories(pages, { siteLevel, startUrl, edges, externalBrokenLinks });
 
   const counts = { "2xx": 0, "3xx": 0, "4xx": 0, "5xx": 0, other: 0 };
   for (const p of pages) counts[statusClass(p.status)] += 1;
@@ -86,7 +101,7 @@ export function buildReport({ startUrl, pages, crawlTimeS, siteLevel }) {
   const kpis = {
     totalUrls,
     successRate,
-    brokenLinks: counts["4xx"] + counts["5xx"],
+    brokenLinks: counts["4xx"] + counts["5xx"] + externalBrokenLinks.length,
     missingH1,
     medianWordCount: Math.round(median(wordCounts)),
     ogCoveragePct: totalUrls ? Math.round((ogPresent / totalUrls) * 1000) / 10 : 0,
@@ -97,15 +112,25 @@ export function buildReport({ startUrl, pages, crawlTimeS, siteLevel }) {
 
   const recommendations = [...new Set(categories.flatMap((c) => c.recommendations))];
 
-  const links = pages.map(toLinkRecord);
+  const links = pages.map((p) => toLinkRecord(p, inDegree));
 
-  // Phase 1 placeholder ranking (shallower pages first, then longer content).
-  // Real inbound-link/PageRank-based ranking arrives in Phase 2 once the
-  // link graph (edges/nodes) is built — see docs/ROADMAP.md.
+  // Inbound-link-based ranking (real PageRank-style graph, not the Phase 1
+  // depth placeholder) now that the internal link graph is built.
   const topPages = links
     .filter((p) => typeof p.status === "number" && p.status < 400)
-    .sort((a, b) => a.depth - b.depth || b.wordCount - a.wordCount)
+    .sort((a, b) => b.inlinksCount - a.inlinksCount || b.wordCount - a.wordCount)
     .slice(0, 15);
+
+  const redirects = pages
+    .filter((p) => (p.redirectChainLength || 0) > 0)
+    .map((p) => ({ url: p.url, status: p.status, finalUrl: p.finalUrl, redirectChainLength: p.redirectChainLength }));
+
+  const brokenLinks = [
+    ...pages
+      .filter((p) => (typeof p.status === "number" && p.status >= 400) || p.status === "error")
+      .map((p) => ({ url: p.url, status: p.status, source: "crawled" })),
+    ...externalBrokenLinks.map((l) => ({ url: l.url, status: l.status, source: "external" })),
+  ];
 
   return {
     siteName: new URL(startUrl).hostname,
@@ -126,5 +151,8 @@ export function buildReport({ startUrl, pages, crawlTimeS, siteLevel }) {
     siteConfig: siteLevel,
     topPages,
     links,
+    redirects,
+    brokenLinks,
+    unknownLinks,
   };
 }

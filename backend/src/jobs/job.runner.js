@@ -1,7 +1,15 @@
 import { crawl } from "../crawl/crawler.js";
 import { checkSiteLevel } from "../analysis/siteLevel.js";
+import { checkLinks } from "../crawl/linkChecker.js";
+import { buildEdges } from "../graph/linkGraph.js";
 import { buildReport } from "../reporting/builder.js";
-import { insertReport, insertCrawlRun, insertCrawlPages, updateCrawlRun } from "../db/repository.js";
+import {
+  insertReport,
+  insertCrawlRun,
+  insertCrawlPages,
+  insertEdges,
+  updateCrawlRun,
+} from "../db/repository.js";
 import { createJob, patchJob } from "./job.store.js";
 
 const CRAWL_OPTIONS = {
@@ -10,6 +18,28 @@ const CRAWL_OPTIONS = {
   concurrency: 5,
   timeoutMs: 10000,
 };
+
+// Mirrors the reference's single-page link checker's cap (MAX_LINKS_TO_CHECK)
+// applied crawl-wide: only links that weren't themselves crawled (external,
+// or beyond depth/page limits) need a separate check.
+const MAX_OUTLINKS_TO_CHECK = 50;
+
+function collectUncrawledOutlinks(pages) {
+  const crawledUrls = new Set();
+  for (const p of pages) {
+    crawledUrls.add(p.url);
+    if (p.finalUrl) crawledUrls.add(p.finalUrl);
+  }
+
+  const uncrawled = new Set();
+  for (const p of pages) {
+    const links = [...(p.pageAnalysis?.internalLinks || []), ...(p.pageAnalysis?.externalLinks || [])];
+    for (const link of links) {
+      if (!crawledUrls.has(link)) uncrawled.add(link);
+    }
+  }
+  return [...uncrawled].slice(0, MAX_OUTLINKS_TO_CHECK);
+}
 
 async function runJob(jobId, url) {
   try {
@@ -27,11 +57,23 @@ async function runJob(jobId, url) {
     patchJob(jobId, { status: "analyzing", progress: { pagesCrawled: pages.length, pagesTotal: pages.length } });
 
     insertCrawlPages(crawlRunId, pages);
+
+    const edges = buildEdges(pages);
+    insertEdges(crawlRunId, edges);
+
+    patchJob(jobId, {
+      status: "checking_links",
+      progress: { pagesCrawled: pages.length, pagesTotal: pages.length },
+    });
+
+    const uncrawledOutlinks = collectUncrawledOutlinks(pages);
+    const externalLinkChecks = await checkLinks(uncrawledOutlinks, { concurrency: 10 });
+
     updateCrawlRun(crawlRunId, { pagesCrawled: pages.length, crawlTimeS });
 
     patchJob(jobId, { status: "scoring", progress: { pagesCrawled: pages.length, pagesTotal: pages.length } });
 
-    const report = buildReport({ startUrl: url, pages, crawlTimeS, siteLevel });
+    const report = buildReport({ startUrl: url, pages, crawlTimeS, siteLevel, edges, externalLinkChecks });
 
     const reportId = insertReport({
       url,

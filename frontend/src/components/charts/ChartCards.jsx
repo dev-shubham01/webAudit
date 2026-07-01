@@ -1,0 +1,139 @@
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  Cell,
+} from "recharts";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import { palette, scoreBandColor } from "../../utils/chartPalette.js";
+
+const tickStyle = { fill: "#94A3B8", fontSize: 11 };
+const tooltipStyle = { background: "#0F172A", border: "1px solid #334155", fontSize: 12 };
+const gridColor = "rgba(100,116,139,0.3)";
+
+function ChartShell({ title, subtitle, children }) {
+  return (
+    <Card className="border-[#334155] bg-[#1E293B]">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-sm font-medium text-[#E2E8F0]">{title}</CardTitle>
+        {subtitle && <p className="text-xs text-[#64748B]">{subtitle}</p>}
+      </CardHeader>
+      <CardContent>{children}</CardContent>
+    </Card>
+  );
+}
+
+/** Horizontal bars for categorical breakdowns (status codes, categories, etc). */
+export function HorizontalBarChartCard({ title, subtitle, data, yWidth = 110, height }) {
+  return (
+    <ChartShell title={title} subtitle={subtitle}>
+      <ResponsiveContainer width="100%" height={height ?? Math.max(120, data.length * 36)}>
+        <BarChart data={data} layout="vertical" margin={{ left: 16, right: 16 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke={gridColor} horizontal={false} />
+          <XAxis type="number" allowDecimals={false} tick={tickStyle} />
+          <YAxis type="category" dataKey="name" width={yWidth} tick={tickStyle} />
+          <Tooltip contentStyle={tooltipStyle} />
+          <Bar dataKey="count" radius={[0, 4, 4, 0]}>
+            {data.map((entry, index) => (
+              <Cell key={entry.name} fill={entry.color || palette(index)} />
+            ))}
+          </Bar>
+        </BarChart>
+      </ResponsiveContainer>
+    </ChartShell>
+  );
+}
+
+/** Vertical bars for ordered distributions (word count buckets, response time buckets, etc). */
+export function VerticalBarChartCard({ title, subtitle, data, height = 220 }) {
+  return (
+    <ChartShell title={title} subtitle={subtitle}>
+      <ResponsiveContainer width="100%" height={height}>
+        <BarChart data={data} margin={{ top: 8, right: 8, left: 8, bottom: 24 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke={gridColor} vertical={false} />
+          <XAxis dataKey="name" tick={{ ...tickStyle, fontSize: 10 }} angle={-15} textAnchor="end" height={50} />
+          <YAxis allowDecimals={false} tick={tickStyle} />
+          <Tooltip contentStyle={tooltipStyle} />
+          <Bar dataKey="count" radius={[4, 4, 0, 0]}>
+            {data.map((entry, index) => (
+              <Cell key={entry.name} fill={entry.color || palette(index)} />
+            ))}
+          </Bar>
+        </BarChart>
+      </ResponsiveContainer>
+    </ChartShell>
+  );
+}
+
+/** Grouped vertical bars for multi-series comparisons (e.g. Title vs Meta Description health). */
+export function GroupedBarChartCard({ title, subtitle, data, seriesKeys, height = 220 }) {
+  return (
+    <ChartShell title={title} subtitle={subtitle}>
+      <ResponsiveContainer width="100%" height={height}>
+        <BarChart data={data} margin={{ top: 8, right: 8, left: 8, bottom: 8 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke={gridColor} vertical={false} />
+          <XAxis dataKey="name" tick={tickStyle} />
+          <YAxis allowDecimals={false} tick={tickStyle} />
+          <Tooltip contentStyle={tooltipStyle} />
+          <Legend wrapperStyle={{ fontSize: 12, color: "#94A3B8" }} />
+          {seriesKeys.map((key, i) => (
+            <Bar key={key} dataKey={key} fill={palette(i)} radius={[4, 4, 0, 0]} />
+          ))}
+        </BarChart>
+      </ResponsiveContainer>
+    </ChartShell>
+  );
+}
+
+function scoreStatusLabel(score) {
+  if (score === null || score === undefined) return "Not measured";
+  if (score >= 90) return "Good";
+  if (score >= 50) return "Needs Improvement";
+  return "Critical";
+}
+
+/** SVG circular progress ring for a 0-100 category score (or null = not measured). */
+export function CircularScore({ score, size = 88, strokeWidth = 8 }) {
+  const radius = (size - strokeWidth) / 2;
+  const circumference = 2 * Math.PI * radius;
+  const pct = score === null || score === undefined ? 0 : score / 100;
+  const color = scoreBandColor(score);
+
+  return (
+    <div className="flex flex-col items-center gap-2">
+      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+        <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="#334155" strokeWidth={strokeWidth} />
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          fill="none"
+          stroke={color}
+          strokeWidth={strokeWidth}
+          strokeDasharray={`${circumference * pct} ${circumference}`}
+          strokeLinecap="round"
+          transform={`rotate(-90 ${size / 2} ${size / 2})`}
+        />
+        <text
+          x="50%"
+          y="50%"
+          textAnchor="middle"
+          dominantBaseline="middle"
+          fontSize={size * 0.26}
+          fontWeight="700"
+          fill="#E2E8F0"
+        >
+          {score === null || score === undefined ? "—" : score}
+        </text>
+      </svg>
+      <span className="text-xs" style={{ color }}>
+        {scoreStatusLabel(score)}
+      </span>
+    </div>
+  );
+}
