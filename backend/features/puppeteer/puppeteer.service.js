@@ -1,6 +1,7 @@
 import puppeteer from "puppeteer";
 import { analyzeSEO } from "../seo/seo.service.js";
 import { analyzeLinks } from "../links/links.service.js";
+import { analyzeImages } from "../images/image.service.js";
 
 const GOTO_TIMEOUT_MS = 30000;
 const BODY_WAIT_MS = 10000;
@@ -13,6 +14,11 @@ const getPuppeteerFallback = () => ({
   consoleErrors: [],
   networkErrors: [],
   seo: null,
+  images: {
+    totalImages: 0,
+    largeImages: [],
+    oversizedCount: 0,
+  },
   links: {
     totalLinks: 0,
     checkedLinks: 0,
@@ -34,6 +40,11 @@ export async function runPuppeteerScan(url) {
   const networkErrors = [];
   let seo = null;
   let screenshot = null;
+  let images = {
+    totalImages: 0,
+    largeImages: [],
+    oversizedCount: 0,
+  };
   let links = {
     totalLinks: 0,
     checkedLinks: 0,
@@ -132,6 +143,7 @@ export async function runPuppeteerScan(url) {
         consoleErrors,
         networkErrors,
         seo: null,
+        images,
         links,
         isBlocked: true,
       };
@@ -161,6 +173,7 @@ export async function runPuppeteerScan(url) {
 
     seo = await analyzeSEO(page);
     links = await analyzeLinks(page);
+    images = await analyzeImages(page);
 
     try {
       const buffer = await page.screenshot({
@@ -191,6 +204,7 @@ export async function runPuppeteerScan(url) {
     consoleErrors,
     networkErrors,
     seo,
+    images,
     links,
     isBlocked,
   };

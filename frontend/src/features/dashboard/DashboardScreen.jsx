@@ -5,6 +5,7 @@ import { generateInsights } from "../../utils/generateInsights.js";
 import DashboardHeader from "./DashboardHeader";
 import ErrorsSection from "./ErrorsSection";
 import HeroScoreSection from "./HeroScoreSection";
+import ImageOptimizationSection from "./ImageOptimizationSection";
 import InsightsSection from "./InsightsSection";
 import KpiSection from "./KpiSection";
 import LinksSection from "./LinksSection";
@@ -53,10 +54,17 @@ export default function DashboardScreen() {
     successCount: 0,
     unknownLinks: [],
   };
+  const imageAnalysis = scanResult?.images ?? {
+    totalImages: 0,
+    largeImages: [],
+    oversizedCount: 0,
+  };
   const brokenLinks = Array.isArray(links?.brokenLinks) ? links.brokenLinks : [];
+  const largeImages = Array.isArray(imageAnalysis?.largeImages) ? imageAnalysis.largeImages : [];
   const brokenLinksCount = brokenLinks.length;
   const totalLinksCount = Number(links?.totalLinks) || 0;
   const successLinksCount = Number(links?.successCount) || 0;
+  const totalAnalyzedImages = Number(imageAnalysis?.totalImages) || 0;
 
   const overallScore = Number(score?.overallScore) || 0;
   const perfScore = breakdown?.performance ?? performance?.performanceScore ?? 0;
@@ -174,6 +182,10 @@ export default function DashboardScreen() {
           brokenLinksCount={brokenLinksCount}
           successLinksCount={successLinksCount}
           brokenLinks={brokenLinks}
+        />
+        <ImageOptimizationSection
+          totalImages={totalAnalyzedImages}
+          largeImages={largeImages}
         />
         <PerformanceMetricsSection
           fcp={performance?.metrics?.fcp}

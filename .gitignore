@@ -33,6 +33,14 @@ junit.xml
 .tmp/
 temp/
 
+# Runtime data (crawler rewrite: SQLite reports, job/lighthouse artifacts)
+backend/data/
+backend/tmp/
+*.sqlite
+*.sqlite3
+*.db
+*.db-journal
+
 # OS-generated files
 .DS_Store
 Thumbs.db
@@ -43,3 +51,4 @@ Thumbs.db
 
 # Cursor files
 .cursor/
+reference*

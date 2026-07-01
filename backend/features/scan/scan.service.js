@@ -11,6 +11,12 @@ const getPerformanceFallback = () => ({
   },
 });
 
+const getImagesFallback = () => ({
+  totalImages: 0,
+  largeImages: [],
+  oversizedCount: 0,
+});
+
 export async function runScan(url) {
   const scanResult = await runPuppeteerScan(url);
 
@@ -28,6 +34,7 @@ export async function runScan(url) {
     ? scanResult.networkErrors
     : [];
   const isBlocked = Boolean(scanResult?.isBlocked);
+  const images = scanResult?.images || getImagesFallback();
 
   if (isBlocked) {
     return {
@@ -38,6 +45,7 @@ export async function runScan(url) {
       networkErrors,
       performance,
       seo: null,
+      images,
     };
   }
 
@@ -102,6 +110,17 @@ export async function runScan(url) {
     score = null;
   }
 
+  const insights = [];
+  if (Number(images?.oversizedCount) > 0) {
+    insights.push({
+      type: "Performance",
+      severity: "medium",
+      message: "Large images detected",
+      why: "Large images slow down page load and affect LCP",
+      fix: "Compress images or use WebP format",
+    });
+  }
+
   return {
     screenshot: scanResult?.screenshot ?? null,
     consoleErrors,
@@ -109,7 +128,8 @@ export async function runScan(url) {
     seo,
     performance,
     score,
-    insights: null,
+    insights,
     links,
+    images,
   };
 }

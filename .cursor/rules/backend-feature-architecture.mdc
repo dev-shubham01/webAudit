@@ -28,6 +28,13 @@ Follow Feature-Based Architecture with internal layering for all backend changes
 - `backend/features/seo/seo.service.js`
 - `backend/features/lighthouse/lighthouse.service.js`
 
+## Pipeline-Internal Modules (crawler rewrite, see docs/ROADMAP.md)
+
+- Modules under `backend/src/{crawl,analysis,lighthouse,security,ml,graph,reporting,db}/`
+  are pipeline-internal, not HTTP-facing, and do not need the route/controller
+  split above — they're called by `jobs/job.runner.js`, which is the one
+  HTTP-facing feature and does follow the route/controller/service split.
+
 ## Coding Standards
 
 - One clear responsibility per file.
