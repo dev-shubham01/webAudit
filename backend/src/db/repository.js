@@ -36,16 +36,55 @@ function rowToJob(row) {
   };
 }
 
-export function insertReport({ url, siteName, generatedAt, data }) {
+export function insertReport({ url, siteName, generatedAt, data, crawlRunId }) {
   const db = getDb();
   const info = db
     .prepare(
-      `INSERT INTO reports (url, site_name, status, generated_at, data)
-       VALUES (?, ?, 'done', ?, ?)`,
+      `INSERT INTO reports (url, site_name, status, generated_at, data, crawl_run_id)
+       VALUES (?, ?, 'done', ?, ?, ?)`,
     )
-    .run(url, siteName ?? null, generatedAt, JSON.stringify(data));
+    .run(url, siteName ?? null, generatedAt, JSON.stringify(data), crawlRunId ?? null);
 
   return info.lastInsertRowid;
+}
+
+export function insertCrawlRun({ startUrl, createdAt }) {
+  const db = getDb();
+  const info = db
+    .prepare(`INSERT INTO crawl_runs (start_url, created_at) VALUES (?, ?)`)
+    .run(startUrl, createdAt);
+
+  return info.lastInsertRowid;
+}
+
+export function updateCrawlRun(crawlRunId, { pagesCrawled, crawlTimeS }) {
+  const db = getDb();
+  db.prepare(`UPDATE crawl_runs SET pages_crawled = ?, crawl_time_s = ? WHERE id = ?`).run(
+    pagesCrawled,
+    crawlTimeS,
+    crawlRunId,
+  );
+}
+
+export function insertCrawlPages(crawlRunId, pages) {
+  const db = getDb();
+  const insert = db.prepare(
+    `INSERT INTO crawl_pages (crawl_run_id, url, final_url, status, depth, data)
+     VALUES (?, ?, ?, ?, ?, ?)`,
+  );
+  const insertMany = db.transaction((rows) => {
+    for (const page of rows) {
+      insert.run(
+        crawlRunId,
+        page.url,
+        page.finalUrl ?? null,
+        String(page.status),
+        page.depth ?? null,
+        JSON.stringify(page),
+      );
+    }
+  });
+  insertMany(pages);
 }
 
 export function getReportById(id) {

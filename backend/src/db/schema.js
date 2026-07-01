@@ -17,7 +17,8 @@ function createSchema(database) {
       site_name TEXT,
       status TEXT NOT NULL DEFAULT 'done',
       generated_at TEXT NOT NULL,
-      data TEXT NOT NULL
+      data TEXT NOT NULL,
+      crawl_run_id INTEGER
     );
 
     CREATE TABLE IF NOT EXISTS jobs (
@@ -30,6 +31,25 @@ function createSchema(database) {
       created_at TEXT NOT NULL,
       updated_at TEXT NOT NULL
     );
+
+    CREATE TABLE IF NOT EXISTS crawl_runs (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      start_url TEXT NOT NULL,
+      created_at TEXT NOT NULL,
+      pages_crawled INTEGER,
+      crawl_time_s REAL
+    );
+
+    CREATE TABLE IF NOT EXISTS crawl_pages (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      crawl_run_id INTEGER NOT NULL,
+      url TEXT NOT NULL,
+      final_url TEXT,
+      status TEXT,
+      depth INTEGER,
+      data TEXT NOT NULL
+    );
+    CREATE INDEX IF NOT EXISTS idx_crawl_pages_run ON crawl_pages (crawl_run_id);
   `);
 }
 

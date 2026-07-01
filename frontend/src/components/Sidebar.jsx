@@ -12,7 +12,7 @@ import { Avatar, AvatarFallback } from "./ui/avatar";
 
 const navItems = [
   { path: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { path: "/reports/1", label: "Reports", icon: FileText },
+  { path: "/content", label: "Content", icon: FileText },
   { path: "/monitoring", label: "Monitoring", icon: Activity },
   { path: "/compare", label: "Compare", icon: GitCompare },
   { path: "/security", label: "Security", icon: Shield },

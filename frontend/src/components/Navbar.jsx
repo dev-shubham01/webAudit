@@ -4,27 +4,27 @@ import { Search, Bell } from "lucide-react";
 import Input from "./ui/input";
 import Button from "./ui/button";
 import { Avatar, AvatarFallback } from "./ui/avatar";
-import { useScan } from "../context/ScanContext.jsx";
+import { useReport } from "../context/ReportContext.jsx";
 
 const URL_HELPER =
   "Enter any website URL to analyze performance, SEO, and errors";
 
 export function Navbar() {
   const [url, setUrl] = useState("");
-  const { executeScan, loading, scannedUrl } = useScan();
+  const { startNewCrawl, loading, data } = useReport();
   const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
-    if (scannedUrl) setUrl(scannedUrl);
-  }, [scannedUrl]);
+    if (data?.url) setUrl(data.url);
+  }, [data]);
 
   const handleAnalyze = async () => {
     try {
-      await executeScan(url);
+      await startNewCrawl(url);
       navigate("/dashboard", { replace: location.pathname === "/dashboard" });
     } catch {
-      /* error shown in ScanProvider banner */
+      /* error shown in ReportProvider banner */
     }
   };
 

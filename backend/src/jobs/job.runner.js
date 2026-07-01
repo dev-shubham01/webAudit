@@ -1,50 +1,50 @@
-import { runPuppeteerScan } from "../../features/puppeteer/puppeteer.service.js";
-import { insertReport } from "../db/repository.js";
+import { crawl } from "../crawl/crawler.js";
+import { checkSiteLevel } from "../analysis/siteLevel.js";
+import { buildReport } from "../reporting/builder.js";
+import { insertReport, insertCrawlRun, insertCrawlPages, updateCrawlRun } from "../db/repository.js";
 import { createJob, patchJob } from "./job.store.js";
 
-/**
- * Phase 0: a "crawl" is a single-page fetch reusing the existing Puppeteer/SEO
- * service. Real multi-page crawling replaces this in Phase 1 (see docs/ROADMAP.md).
- */
+const CRAWL_OPTIONS = {
+  maxPages: 30,
+  maxDepth: 2,
+  concurrency: 5,
+  timeoutMs: 10000,
+};
+
 async function runJob(jobId, url) {
   try {
-    patchJob(jobId, { status: "crawling", progress: { pagesCrawled: 0, pagesTotal: 1 } });
+    patchJob(jobId, { status: "crawling", progress: { pagesCrawled: 0, pagesTotal: CRAWL_OPTIONS.maxPages } });
 
-    const scanResult = await runPuppeteerScan(url);
+    const crawlRunId = insertCrawlRun({ startUrl: url, createdAt: new Date().toISOString() });
 
-    patchJob(jobId, { status: "scoring", progress: { pagesCrawled: 1, pagesTotal: 1 } });
+    const [{ pages, crawlTimeS }, siteLevel] = await Promise.all([
+      crawl(url, CRAWL_OPTIONS, {
+        onProgress: (progress) => patchJob(jobId, { status: "crawling", progress }),
+      }),
+      checkSiteLevel(url),
+    ]);
 
-    const siteName = new URL(url).hostname;
-    const generatedAt = new Date().toISOString();
+    patchJob(jobId, { status: "analyzing", progress: { pagesCrawled: pages.length, pagesTotal: pages.length } });
+
+    insertCrawlPages(crawlRunId, pages);
+    updateCrawlRun(crawlRunId, { pagesCrawled: pages.length, crawlTimeS });
+
+    patchJob(jobId, { status: "scoring", progress: { pagesCrawled: pages.length, pagesTotal: pages.length } });
+
+    const report = buildReport({ startUrl: url, pages, crawlTimeS, siteLevel });
 
     const reportId = insertReport({
       url,
-      siteName,
-      generatedAt,
-      data: {
-        siteName,
-        url,
-        generatedAt,
-        summary: { pagesCrawled: 1 },
-        pages: [
-          {
-            url,
-            seo: scanResult.seo,
-            links: scanResult.links,
-            images: scanResult.images,
-            consoleErrors: scanResult.consoleErrors,
-            networkErrors: scanResult.networkErrors,
-            isBlocked: scanResult.isBlocked ?? false,
-            screenshot: scanResult.screenshot,
-          },
-        ],
-      },
+      siteName: report.siteName,
+      generatedAt: report.generatedAt,
+      data: report,
+      crawlRunId,
     });
 
     patchJob(jobId, {
       status: "done",
       reportId,
-      progress: { pagesCrawled: 1, pagesTotal: 1 },
+      progress: { pagesCrawled: pages.length, pagesTotal: pages.length },
     });
   } catch (error) {
     console.error(`Job ${jobId} failed:`, error);

@@ -1,12 +1,13 @@
 import { useState } from "react";
-import { ReportProvider, useReport } from "../../context/ReportContext.jsx";
+import { useReport } from "../../context/ReportContext.jsx";
 
 /**
  * Phase 0 scaffold (see docs/ROADMAP.md): proves the job-based crawl API
- * end-to-end before any of the 15 report pages are built on top of it.
- * Intentionally unpolished — replaced by the real Overview page in Phase 1.
+ * end-to-end. Kept as a raw-JSON debug view now that Overview/Content
+ * (Phase 1) are the real report pages. Uses the app-level ReportProvider
+ * (see main.jsx) rather than its own nested instance.
  */
-function ReportsLabInner() {
+export default function ReportsLab() {
   const [url, setUrl] = useState("");
   const { startNewCrawl, loading, error, data, jobStatus } = useReport();
 
@@ -66,13 +67,5 @@ function ReportsLabInner() {
         </pre>
       )}
     </div>
-  );
-}
-
-export default function ReportsLab() {
-  return (
-    <ReportProvider>
-      <ReportsLabInner />
-    </ReportProvider>
   );
 }

@@ -141,7 +141,33 @@ export function ReportProvider({ children }) {
   );
 
   return (
-    <ReportContext.Provider value={value}>{children}</ReportContext.Provider>
+    <ReportContext.Provider value={value}>
+      {loading && (
+        <div
+          className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#0F172A]/60 backdrop-blur-md"
+          aria-busy="true"
+          aria-live="polite"
+        >
+          <div className="h-10 w-10 animate-spin rounded-full border-2 border-[#334155] border-t-[#6366F1]" />
+          <p className="mt-6 text-lg font-medium text-[#E2E8F0]">
+            {jobStatus?.status ? `${jobStatus.status}...` : "Starting crawl..."}
+          </p>
+        </div>
+      )}
+      {error && !loading && (
+        <div className="fixed left-0 right-0 top-0 z-[99] border-b border-[#EF4444]/40 bg-[#450A0A]/95 px-4 py-3 text-center text-sm text-[#FECACA]">
+          <span>{error}</span>
+          <button
+            type="button"
+            onClick={clearError}
+            className="ml-3 underline decoration-[#FECACA]/50 hover:decoration-[#FECACA]"
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
+      {children}
+    </ReportContext.Provider>
   );
 }
 

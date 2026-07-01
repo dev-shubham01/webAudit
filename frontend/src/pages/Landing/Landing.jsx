@@ -8,26 +8,26 @@ import Button from "../../components/ui/button";
 import Input from "../../components/ui/input";
 import { features } from "../../data/data";
 import { Card, CardContent } from "../../components/ui/card";
-import { useScan } from "../../context/ScanContext.jsx";
+import { useReport } from "../../context/ReportContext.jsx";
 
 const URL_HELPER =
   "Enter any website URL to analyze performance, SEO, and errors";
 
 const Landing = () => {
   const [url, setUrl] = useState("");
-  const { executeScan, loading, scannedUrl } = useScan();
+  const { startNewCrawl, loading, data } = useReport();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (scannedUrl) setUrl(scannedUrl);
-  }, [scannedUrl]);
+    if (data?.url) setUrl(data.url);
+  }, [data]);
 
   const handleAnalyze = async () => {
     try {
-      await executeScan(url);
+      await startNewCrawl(url);
       navigate("/dashboard");
     } catch {
-      /* error shown in ScanProvider banner */
+      /* error shown in ReportProvider banner */
     }
   };
 

@@ -1,7 +1,7 @@
 import { useReport } from "../../context/ReportContext.jsx";
-import OverviewScreen from "../../features/overview/OverviewScreen.jsx";
+import ContentScreen from "../../features/content/ContentScreen.jsx";
 
-export default function DashboardGate() {
+export default function ContentGate() {
   const { data, loading } = useReport();
 
   if (!data) {
@@ -10,12 +10,11 @@ export default function DashboardGate() {
       <div className="flex h-[60vh] flex-col items-center justify-center text-center text-[#94A3B8]">
         <h2 className="text-xl font-semibold text-[#E2E8F0]">No report yet</h2>
         <p className="mt-2 max-w-md text-sm">
-          Enter a URL above and click Analyze to crawl a site and see its
-          health report here.
+          Run a crawl from the Dashboard first to see per-page content details here.
         </p>
       </div>
     );
   }
 
-  return <OverviewScreen report={data} />;
+  return <ContentScreen report={data} />;
 }
