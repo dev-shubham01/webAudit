@@ -12,13 +12,26 @@ function rowToReport(row) {
   };
 }
 
+// Mirrors the reference's Home health-score formula: avg(categories[].score),
+// falling back to the crawl's success rate when no categories are scored,
+// weighted 60/40 against the raw 2xx success rate.
+function computeHealthScore(data) {
+  const scores = (data?.categories || []).map((c) => c.score).filter((s) => typeof s === "number");
+  const successRate = data?.summary?.successRate ?? 0;
+  const avgCategoryScore = scores.length ? scores.reduce((a, b) => a + b, 0) / scores.length : successRate;
+  return Math.round(avgCategoryScore * 0.6 + successRate * 0.4);
+}
+
 function rowToReportSummary(row) {
+  const data = JSON.parse(row.data);
   return {
     id: row.id,
     url: row.url,
     siteName: row.site_name,
     status: row.status,
     generatedAt: row.generated_at,
+    summary: data.summary,
+    healthScore: computeHealthScore(data),
   };
 }
 
@@ -122,7 +135,7 @@ export function listReports() {
   const db = getDb();
   const rows = db
     .prepare(
-      `SELECT id, url, site_name, status, generated_at
+      `SELECT id, url, site_name, status, generated_at, data
        FROM reports ORDER BY id DESC`,
     )
     .all();

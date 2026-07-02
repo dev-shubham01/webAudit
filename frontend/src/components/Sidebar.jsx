@@ -1,17 +1,16 @@
 import { Link, useLocation } from "react-router";
-import { LayoutDashboard, FileText, Activity, Link2, Repeat, AlertOctagon, Gauge, Shield, Cpu, Images, BarChart2 } from "lucide-react";
+import { Home, LayoutDashboard, FileText, Activity, Link2, Repeat, AlertOctagon, Gauge, Shield, Cpu, Images, BarChart2, Share2, PieChart } from "lucide-react";
 import { Avatar, AvatarFallback } from "./ui/avatar";
 import { Badge } from "./ui/badge";
 import { useReport } from "../context/ReportContext.jsx";
 
 // Section grouping mirrors the reference's nav (Audit Overview / Crawl
-// Analysis / Content & SEO / Visualizations). Only sections with at least
-// one built page are shown; more items join as later phases ship
-// (Crawl Analytics, Internal Linking, etc.) — see docs/ROADMAP.md.
+// Analysis / Content & SEO / Visualizations) — see docs/ROADMAP.md.
 const NAV_SECTIONS = [
   {
     label: "Audit Overview",
     items: [
+      { path: "/home", label: "Home", icon: Home },
       { path: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
       { path: "/issues", label: "Site Audit", icon: AlertOctagon, badge: "issues" },
     ],
@@ -35,7 +34,11 @@ const NAV_SECTIONS = [
   },
   {
     label: "Visualizations",
-    items: [{ path: "/gallery", label: "Gallery", icon: Images }],
+    items: [
+      { path: "/charts", label: "Crawl Analytics", icon: PieChart },
+      { path: "/network", label: "Internal Linking", icon: Share2 },
+      { path: "/gallery", label: "Gallery", icon: Images },
+    ],
   },
 ];
 

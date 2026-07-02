@@ -1,5 +1,5 @@
 import { buildCategories } from "./categories.js";
-import { computeInDegree } from "../graph/linkGraph.js";
+import { computeInDegree, buildGraphPayload } from "../graph/linkGraph.js";
 
 function median(values) {
   if (!values.length) return 0;
@@ -159,6 +159,8 @@ export function buildReport({
     ...externalBrokenLinks.map((l) => ({ url: l.url, status: l.status, source: "external" })),
   ];
 
+  const graphPayload = buildGraphPayload(pages, edges);
+
   return {
     siteName: new URL(startUrl).hostname,
     url: startUrl,
@@ -189,5 +191,7 @@ export function buildReport({
     contentDuplicates: mlBundle?.contentDuplicates || [],
     languageSummary: mlBundle?.languageSummary || { mixedSite: false, detectedPages: 0, counts: {} },
     anomalies: mlBundle?.anomalies || [],
+    graphNodes: graphPayload.nodes,
+    graphEdges: graphPayload.edges,
   };
 }

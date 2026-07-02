@@ -3,6 +3,7 @@ import {
   Bar,
   XAxis,
   YAxis,
+  ZAxis,
   CartesianGrid,
   Tooltip,
   Legend,
@@ -10,6 +11,8 @@ import {
   Cell,
   PieChart,
   Pie,
+  ScatterChart,
+  Scatter,
 } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { palette, scoreBandColor } from "../../utils/chartPalette.js";
@@ -171,5 +174,58 @@ export function CircularScore({ score, size = 88, strokeWidth = 8 }) {
         {scoreStatusLabel(score)}
       </span>
     </div>
+  );
+}
+
+function xyTooltip(labelX, labelY, formatUrl) {
+  return ({ active, payload }) => {
+    if (!active || !payload?.length) return null;
+    const d = payload[0].payload;
+    return (
+      <div style={{ ...tooltipStyle, padding: "6px 10px", borderRadius: 6 }}>
+        {formatUrl && d.url && <div className="max-w-[220px] truncate text-[#E2E8F0]">{formatUrl(d.url)}</div>}
+        <div className="text-[#94A3B8]">
+          {labelX}: {d.x?.toLocaleString?.() ?? d.x}
+        </div>
+        <div className="text-[#94A3B8]">
+          {labelY}: {d.y?.toLocaleString?.() ?? d.y}
+        </div>
+      </div>
+    );
+  };
+}
+
+/** Bubble chart (scatter + size-encoded Z axis) for 3-metric relationships. */
+export function BubbleChartCard({ title, subtitle, data, xLabel, yLabel, color = "#4C72B0", height = 280 }) {
+  return (
+    <ChartShell title={title} subtitle={subtitle}>
+      <ResponsiveContainer width="100%" height={height}>
+        <ScatterChart margin={{ top: 8, right: 16, left: 8, bottom: 24 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
+          <XAxis type="number" dataKey="x" name={xLabel} tick={tickStyle} label={{ value: xLabel, position: "insideBottom", offset: -8, fill: "#94A3B8", fontSize: 11 }} />
+          <YAxis type="number" dataKey="y" name={yLabel} tick={tickStyle} label={{ value: yLabel, angle: -90, position: "insideLeft", fill: "#94A3B8", fontSize: 11 }} />
+          <ZAxis type="number" dataKey="r" range={[16, 400]} />
+          <Tooltip content={xyTooltip(xLabel, yLabel, (u) => String(u).replace(/^https?:\/\//, ""))} cursor={{ strokeDasharray: "3 3" }} />
+          <Scatter data={data} fill={color} fillOpacity={0.55} stroke={color} />
+        </ScatterChart>
+      </ResponsiveContainer>
+    </ChartShell>
+  );
+}
+
+/** Plain scatter chart for 2-metric relationships (one dot per data point). */
+export function ScatterChartCard({ title, subtitle, data, xLabel, yLabel, color = "#DD8452", height = 280 }) {
+  return (
+    <ChartShell title={title} subtitle={subtitle}>
+      <ResponsiveContainer width="100%" height={height}>
+        <ScatterChart margin={{ top: 8, right: 16, left: 8, bottom: 24 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
+          <XAxis type="number" dataKey="x" name={xLabel} tick={tickStyle} label={{ value: xLabel, position: "insideBottom", offset: -8, fill: "#94A3B8", fontSize: 11 }} />
+          <YAxis type="number" dataKey="y" name={yLabel} tick={tickStyle} label={{ value: yLabel, angle: -90, position: "insideLeft", fill: "#94A3B8", fontSize: 11 }} />
+          <Tooltip content={xyTooltip(xLabel, yLabel, (u) => String(u).replace(/^https?:\/\//, ""))} cursor={{ strokeDasharray: "3 3" }} />
+          <Scatter data={data} fill={color} fillOpacity={0.6} stroke={color} />
+        </ScatterChart>
+      </ResponsiveContainer>
+    </ChartShell>
   );
 }
