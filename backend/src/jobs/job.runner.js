@@ -4,6 +4,9 @@ import { checkLinks } from "../crawl/linkChecker.js";
 import { buildEdges } from "../graph/linkGraph.js";
 import { runLighthouseOnPages } from "../lighthouse/runner.js";
 import { runSecurityScan } from "../security/scanner.js";
+import { groupDuplicates } from "../ml/duplicateDetect.js";
+import { summarizeLanguages } from "../ml/languageDetect.js";
+import { detectAnomalies } from "../ml/anomalyDetect.js";
 import { buildReport } from "../reporting/builder.js";
 import {
   insertReport,
@@ -106,6 +109,12 @@ async function runJob(jobId, url) {
 
     patchJob(jobId, { status: "scoring", progress: { pagesCrawled: pages.length, pagesTotal: pages.length } });
 
+    const mlBundle = {
+      contentDuplicates: groupDuplicates(pages),
+      languageSummary: summarizeLanguages(pages),
+      anomalies: detectAnomalies(pages),
+    };
+
     const report = buildReport({
       startUrl: url,
       pages,
@@ -115,6 +124,7 @@ async function runJob(jobId, url) {
       externalLinkChecks,
       lighthouseByUrl,
       securityFindings,
+      mlBundle,
     });
 
     const reportId = insertReport({

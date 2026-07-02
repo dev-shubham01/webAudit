@@ -1,4 +1,42 @@
+import { createHash } from "node:crypto";
+import { franc } from "franc-min";
 import { normalizeLink } from "../utils/urls.js";
+
+const SIMHASH_BITS = 64;
+
+function hashToken(token) {
+  const digest = createHash("md5").update(token).digest();
+  let hash = 0n;
+  for (let i = 0; i < 8; i += 1) hash = (hash << 8n) | BigInt(digest[i]);
+  return hash;
+}
+
+/**
+ * 64-bit SimHash of a token frequency map — pure algorithmic duplicate-detection
+ * fingerprint (not "ML"), faithfully ported from the reference's ml/enrich.py.
+ * Two pages with a small Hamming distance between fingerprints are near-duplicates.
+ */
+function computeSimhash(words) {
+  if (!words.length) return "0";
+  const freq = new Map();
+  for (const w of words) {
+    const lower = w.toLowerCase();
+    freq.set(lower, (freq.get(lower) || 0) + 1);
+  }
+  const weights = new Array(SIMHASH_BITS).fill(0);
+  for (const [token, count] of freq.entries()) {
+    const hash = hashToken(token);
+    for (let bit = 0; bit < SIMHASH_BITS; bit += 1) {
+      if (hash & (1n << BigInt(bit))) weights[bit] += count;
+      else weights[bit] -= count;
+    }
+  }
+  let result = 0n;
+  for (let bit = 0; bit < SIMHASH_BITS; bit += 1) {
+    if (weights[bit] > 0) result |= 1n << BigInt(bit);
+  }
+  return result.toString(16);
+}
 
 const STOP_WORDS = new Set([
   "the", "and", "for", "that", "this", "with", "from", "your", "have", "are",
@@ -67,7 +105,13 @@ function extractContentText($, rawHtml) {
     score: maxCount ? Math.round((100 * count) / maxCount) : 0,
   }));
 
-  return { wordCount, readingLevel, contentHtmlRatio, topKeywords: keywordRows };
+  // Faithful port (SimHash) + faithful equivalent (franc for langdetect) —
+  // see docs/ARCHITECTURE.md §7 for why these two are "build faithfully"
+  // rather than approximated like anomaly detection.
+  const contentFingerprint = computeSimhash(words);
+  const language = wordCount > 20 ? franc(bodyText) : "und";
+
+  return { wordCount, readingLevel, contentHtmlRatio, topKeywords: keywordRows, contentFingerprint, language };
 }
 
 function metaContent($, attrs) {

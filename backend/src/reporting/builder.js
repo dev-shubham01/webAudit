@@ -44,6 +44,8 @@ function toLinkRecord(p, inDegree) {
     readingLevel: p.seo?.readingLevel ?? 0,
     contentHtmlRatio: p.seo?.contentHtmlRatio ?? 0,
     topKeywords: p.seo?.topKeywords || [],
+    contentFingerprint: p.seo?.contentFingerprint || "0",
+    language: p.seo?.language || "und",
     noindex: Boolean(p.seo?.noindex),
     viewportPresent: Boolean(p.seo?.viewportPresent),
     hasSchema: Boolean(p.seo?.hasSchema),
@@ -53,6 +55,7 @@ function toLinkRecord(p, inDegree) {
     ogDescription: p.seo?.ogDescription || "",
     ogImage: p.seo?.ogImage || "",
     twitterCard: p.seo?.twitterCard || "",
+    twitterImage: p.seo?.twitterImage || "",
     techStack: p.techStack || [],
     responseTimeMs: p.responseTimeMs,
     contentLength: p.contentLength,
@@ -81,6 +84,7 @@ export function buildReport({
   externalLinkChecks = [],
   lighthouseByUrl = {},
   securityFindings = [],
+  mlBundle = null,
 }) {
   const inDegree = computeInDegree(edges);
   const externalBrokenLinks = externalLinkChecks.filter((l) => l.result === "broken");
@@ -99,6 +103,7 @@ export function buildReport({
     externalBrokenLinks,
     lighthouseSummary,
     securityFindings,
+    mlBundle,
   });
 
   const counts = { "2xx": 0, "3xx": 0, "4xx": 0, "5xx": 0, other: 0 };
@@ -181,5 +186,8 @@ export function buildReport({
     lighthouseHumanSummary: lighthouseSummary?.humanSummary || "",
     lighthouseDiagnostics: lighthouseSummary?.diagnostics || [],
     securityFindings,
+    contentDuplicates: mlBundle?.contentDuplicates || [],
+    languageSummary: mlBundle?.languageSummary || { mixedSite: false, detectedPages: 0, counts: {} },
+    anomalies: mlBundle?.anomalies || [],
   };
 }

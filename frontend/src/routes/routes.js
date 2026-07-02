@@ -8,6 +8,9 @@ import RedirectsGate from "../pages/Redirects/RedirectsGate.jsx";
 import IssuesGate from "../pages/Issues/IssuesGate.jsx";
 import LighthouseGate from "../pages/Lighthouse/LighthouseGate.jsx";
 import SecurityGate from "../pages/Security/SecurityGate.jsx";
+import ContentInsightsGate from "../pages/ContentInsights/ContentInsightsGate.jsx";
+import TechStackGate from "../pages/TechStack/TechStackGate.jsx";
+import GalleryGate from "../pages/Gallery/GalleryGate.jsx";
 import ReportsLab from "../pages/ReportsLab/ReportsLab.jsx";
 const router = createBrowserRouter([
   {
@@ -22,6 +25,9 @@ const router = createBrowserRouter([
         { path: "/issues", Component: IssuesGate },
         { path: "/lighthouse", Component: LighthouseGate },
         { path: "/security", Component: SecurityGate },
+        { path: "/content-insights", Component: ContentInsightsGate },
+        { path: "/techstack", Component: TechStackGate },
+        { path: "/gallery", Component: GalleryGate },
         { path: "/lab", Component: ReportsLab }
     ]
   },

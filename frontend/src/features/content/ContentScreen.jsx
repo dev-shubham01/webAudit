@@ -1,99 +1,234 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { ExternalLink, CheckCircle2, FileText, Copy } from "lucide-react";
 import { Card, CardContent } from "../../components/ui/card";
-import { Badge } from "../../components/ui/badge";
-import { CONTENT_FILTERS } from "./content.utils.js";
+import { HorizontalBarChartCard } from "../../components/charts/ChartCards.jsx";
+import { CONTENT_FILTERS, buildContentUrls } from "./content.utils.js";
+
+const PER_PAGE = 50;
 
 export default function ContentScreen({ report }) {
-  const { links } = report.data;
-  const [activeFilter, setActiveFilter] = useState("all");
+  const { links, contentDuplicates } = report.data;
+  const contentUrls = useMemo(() => buildContentUrls(links), [links]);
+  const [filterKey, setFilterKey] = useState("missing_h1");
+  const [page, setPage] = useState(1);
 
-  const filtered = useMemo(() => {
-    const filter = CONTENT_FILTERS.find((f) => f.id === activeFilter) ?? CONTENT_FILTERS[0];
-    return links.filter(filter.test);
-  }, [links, activeFilter]);
+  const list = contentUrls[filterKey] || [];
+  const totalIssues = CONTENT_FILTERS.reduce((sum, f) => sum + (contentUrls[f.key] || []).length, 0);
+
+  useEffect(() => {
+    setPage(1);
+  }, [filterKey]);
+
+  const totalPages = Math.max(1, Math.ceil(list.length / PER_PAGE));
+
+  useEffect(() => {
+    setPage((p) => Math.min(Math.max(1, p), totalPages));
+  }, [totalPages]);
+
+  const pageSlice = list.slice((page - 1) * PER_PAGE, page * PER_PAGE);
+  const rowFrom = list.length === 0 ? 0 : (page - 1) * PER_PAGE + 1;
+  const rowTo = Math.min(page * PER_PAGE, list.length);
+
+  const issueBarData = CONTENT_FILTERS.map((f) => ({ name: f.label, count: (contentUrls[f.key] || []).length }));
+  const activeFilter = CONTENT_FILTERS.find((f) => f.key === filterKey);
+  const showMetricCol =
+    filterKey === "meta_desc_short" || filterKey === "meta_desc_long" || filterKey === "multiple_h1" || filterKey === "thin_content";
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold text-[#E2E8F0]">Content</h1>
+        <h1 className="text-2xl font-semibold text-[#E2E8F0]">On-Page SEO</h1>
         <p className="mt-1 text-sm text-[#94A3B8]">
-          Per-page SEO and content fields across {links.length} crawled page{links.length === 1 ? "" : "s"}.
+          Audit missing or duplicate titles, meta descriptions, and H1 tags. {totalIssues} total{" "}
+          {totalIssues === 1 ? "issue" : "issues"} detected.
         </p>
       </div>
 
-      <div className="flex flex-wrap gap-2">
-        {CONTENT_FILTERS.map((filter) => {
-          const count = filter.id === "all" ? links.length : links.filter(filter.test).length;
-          const isActive = activeFilter === filter.id;
+      {contentDuplicates?.length > 0 && (
+        <Card className="border-[#334155] bg-[#1E293B]">
+          <CardContent className="p-4">
+            <div className="mb-3 flex items-center gap-2">
+              <Copy className="h-4 w-4 text-violet-400" />
+              <h2 className="text-sm font-bold text-[#E2E8F0]">Near-duplicate clusters</h2>
+            </div>
+            <div className="max-h-72 overflow-y-auto rounded-lg border border-[#334155]">
+              <table className="w-full text-left text-sm">
+                <thead className="sticky top-0 bg-[#0F172A]">
+                  <tr className="text-xs uppercase text-[#64748B]">
+                    <th className="px-4 py-2 font-medium">Cluster</th>
+                    <th className="px-4 py-2 font-medium">Representative</th>
+                    <th className="px-4 py-2 text-right font-medium">URLs</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {contentDuplicates.slice(0, 40).map((g) => (
+                    <tr key={g.id} className="border-t border-[#334155]/50">
+                      <td className="px-4 py-2 font-mono text-xs text-violet-300">{g.id}</td>
+                      <td className="max-w-md truncate px-4 py-2">
+                        <a
+                          href={g.representativeUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="font-mono text-xs text-[#6366F1] hover:underline"
+                        >
+                          {g.representativeUrl}
+                        </a>
+                      </td>
+                      <td className="px-4 py-2 text-right text-xs tabular-nums text-[#94A3B8]">{g.memberCount}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {totalIssues > 0 && (
+        <HorizontalBarChartCard
+          title="Issues by type"
+          subtitle="URL count per on-page issue category"
+          data={issueBarData}
+          yWidth={140}
+          height={352}
+        />
+      )}
+
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-7">
+        {CONTENT_FILTERS.map(({ key, label }) => {
+          const count = (contentUrls[key] || []).length;
+          const hasIssues = count > 0;
+          const isActive = filterKey === key;
           return (
             <button
-              key={filter.id}
+              key={key}
               type="button"
-              onClick={() => setActiveFilter(filter.id)}
-              className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
+              onClick={() => setFilterKey(key)}
+              className={`rounded-xl border p-3 text-left transition-all ${
                 isActive
-                  ? "border-[#6366F1] bg-[#6366F1]/10 text-[#6366F1]"
-                  : "border-[#334155] text-[#94A3B8] hover:border-[#6366F1]/50 hover:text-[#E2E8F0]"
+                  ? hasIssues
+                    ? "border-red-500/40 bg-red-500/10 ring-1 ring-red-500/20"
+                    : "border-green-500/40 bg-green-500/10 ring-1 ring-green-500/20"
+                  : hasIssues
+                    ? "border-amber-700/40 bg-[#1E293B] hover:border-amber-600/60"
+                    : "border-[#334155] bg-[#1E293B] opacity-60 hover:border-[#475569]"
               }`}
             >
-              {filter.label} <span className="text-[#64748B]">({count})</span>
+              <div className={`text-xl font-bold ${hasIssues ? (isActive ? "text-red-400" : "text-amber-400") : "text-green-400"}`}>
+                {count}
+              </div>
+              <div className="mt-0.5 text-xs leading-tight text-[#94A3B8]">{label}</div>
             </button>
           );
         })}
       </div>
 
-      <Card className="border-[#334155] bg-[#1E293B]">
-        <CardContent className="overflow-x-auto p-0">
-          <table className="w-full text-left text-sm">
-            <thead>
-              <tr className="border-b border-[#334155] text-xs uppercase text-[#64748B]">
-                <th className="px-6 py-2 font-medium">URL</th>
-                <th className="px-4 py-2 font-medium">Title</th>
-                <th className="px-4 py-2 font-medium">Meta desc.</th>
-                <th className="px-4 py-2 font-medium">H1s</th>
-                <th className="px-4 py-2 font-medium">Words</th>
-                <th className="px-4 py-2 font-medium">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="px-6 py-8 text-center text-[#64748B]">
-                    No pages match this filter.
-                  </td>
-                </tr>
-              ) : (
-                filtered.map((page) => (
-                  <tr key={page.url} className="border-b border-[#334155]/50">
-                    <td className="max-w-xs truncate px-6 py-2 text-[#CBD5E1]" title={page.url}>
-                      {page.url}
-                    </td>
-                    <td className="max-w-xs truncate px-4 py-2 text-[#94A3B8]" title={page.title}>
-                      {page.title || <span className="text-[#EF4444]">Missing</span>}
-                    </td>
-                    <td
-                      className="max-w-xs truncate px-4 py-2 text-[#94A3B8]"
-                      title={page.metaDescription}
-                    >
-                      {page.metaDescription || <span className="text-[#EF4444]">Missing</span>}
-                    </td>
-                    <td className="px-4 py-2 text-[#94A3B8]">
-                      {page.h1Count === 0 ? (
-                        <Badge variant="destructive">0</Badge>
-                      ) : page.h1Count > 1 ? (
-                        <Badge variant="secondary">{page.h1Count}</Badge>
-                      ) : (
-                        page.h1Count
-                      )}
-                    </td>
-                    <td className="px-4 py-2 text-[#94A3B8]">{page.wordCount}</td>
-                    <td className="px-4 py-2 text-[#94A3B8]">{page.status}</td>
+      {activeFilter?.guidance && (
+        <div className="flex items-start gap-3 rounded-xl border border-blue-500/20 bg-blue-500/5 px-4 py-3">
+          <FileText className="mt-0.5 h-4 w-4 shrink-0 text-[#6366F1]" />
+          <p className="text-sm leading-relaxed text-[#E2E8F0]">{activeFilter.guidance}</p>
+        </div>
+      )}
+
+      <Card className="flex flex-col border-[#334155] bg-[#1E293B]">
+        {list.length === 0 ? (
+          <CardContent className="flex flex-col items-center justify-center gap-3 py-16">
+            <CheckCircle2 className="h-10 w-10 text-green-600" />
+            <p className="text-sm font-medium text-[#94A3B8]">No URLs affected by this issue.</p>
+            <p className="text-xs text-[#64748B]">Great job — nothing to fix here.</p>
+          </CardContent>
+        ) : (
+          <>
+            <div className="space-y-1.5 border-b border-[#334155] bg-[#0F172A]/50 px-4 py-3">
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-xs font-semibold uppercase tracking-wide text-[#94A3B8]">{activeFilter?.label}</span>
+                <span className="shrink-0 text-xs text-[#64748B]">
+                  {list.length} {list.length === 1 ? "URL" : "URLs"}
+                </span>
+              </div>
+            </div>
+            <CardContent className="overflow-x-auto p-0">
+              <table className="w-full text-left text-sm">
+                <thead>
+                  <tr className="border-b border-[#334155] text-xs uppercase text-[#64748B]">
+                    <th className="w-12 px-4 py-2 text-center font-medium">#</th>
+                    <th className="px-4 py-2 font-medium">Page</th>
+                    {showMetricCol && (
+                      <th className="px-4 py-2 text-center font-medium">
+                        {filterKey === "multiple_h1" ? "H1 Count" : filterKey === "thin_content" ? "Chars" : "Length"}
+                      </th>
+                    )}
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </CardContent>
+                </thead>
+                <tbody>
+                  {pageSlice.map((item, i) => {
+                    const rowNum = (page - 1) * PER_PAGE + i + 1;
+                    return (
+                      <tr key={`${item.url}-${rowNum}`} className="border-b border-[#334155]/50">
+                        <td className="px-4 py-2 text-center text-sm font-semibold tabular-nums text-[#64748B]">{rowNum}</td>
+                        <td className="px-4 py-2">
+                          <div className="line-clamp-2 text-sm font-medium text-[#E2E8F0]" title={item.title || undefined}>
+                            {item.title || <span className="font-normal italic text-[#64748B]">No title</span>}
+                          </div>
+                          <a
+                            href={item.url}
+                            target="_blank"
+                            rel="noreferrer"
+                            title={item.url}
+                            className="mt-0.5 flex items-center gap-1.5 text-xs text-[#64748B] hover:text-[#6366F1]"
+                          >
+                            <span className="truncate font-mono">{item.url}</span>
+                            <ExternalLink className="h-3.5 w-3.5 shrink-0" />
+                          </a>
+                        </td>
+                        {showMetricCol && (
+                          <td className="px-4 py-2 text-center">
+                            <span className="text-sm font-bold tabular-nums text-amber-400">
+                              {filterKey === "multiple_h1"
+                                ? item.h1Count
+                                : filterKey === "thin_content"
+                                  ? item.contentLength
+                                  : item.metaDescLen}
+                            </span>
+                          </td>
+                        )}
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </CardContent>
+            <div className="flex flex-col gap-3 border-t border-[#334155] bg-[#0F172A] p-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="space-y-0.5 text-sm text-[#94A3B8]">
+                <div>
+                  Showing {rowFrom}–{rowTo} of {list.length}
+                </div>
+                <div>
+                  Page <span className="font-bold text-[#E2E8F0]">{page}</span> of{" "}
+                  <span className="font-bold text-[#E2E8F0]">{totalPages}</span>
+                </div>
+              </div>
+              <div className="flex justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={page <= 1}
+                  className="rounded-md border border-[#334155] px-3 py-1.5 text-sm text-[#E2E8F0] disabled:opacity-40"
+                >
+                  Previous
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={page >= totalPages}
+                  className="rounded-md border border-[#334155] px-3 py-1.5 text-sm text-[#E2E8F0] disabled:opacity-40"
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          </>
+        )}
       </Card>
     </div>
   );
