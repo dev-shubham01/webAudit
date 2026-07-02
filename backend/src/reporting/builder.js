@@ -80,6 +80,7 @@ export function buildReport({
   edges = [],
   externalLinkChecks = [],
   lighthouseByUrl = {},
+  securityFindings = [],
 }) {
   const inDegree = computeInDegree(edges);
   const externalBrokenLinks = externalLinkChecks.filter((l) => l.result === "broken");
@@ -97,6 +98,7 @@ export function buildReport({
     edges,
     externalBrokenLinks,
     lighthouseSummary,
+    securityFindings,
   });
 
   const counts = { "2xx": 0, "3xx": 0, "4xx": 0, "5xx": 0, other: 0 };
@@ -178,5 +180,6 @@ export function buildReport({
     lighthouseSummary,
     lighthouseHumanSummary: lighthouseSummary?.humanSummary || "",
     lighthouseDiagnostics: lighthouseSummary?.diagnostics || [],
+    securityFindings,
   };
 }

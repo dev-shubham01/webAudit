@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router";
-import { LayoutDashboard, FileText, Activity, Link2, Repeat, AlertOctagon, Gauge } from "lucide-react";
+import { LayoutDashboard, FileText, Activity, Link2, Repeat, AlertOctagon, Gauge, Shield } from "lucide-react";
 import { Avatar, AvatarFallback } from "./ui/avatar";
 import { Badge } from "./ui/badge";
 import { useReport } from "../context/ReportContext.jsx";
@@ -7,8 +7,7 @@ import { useReport } from "../context/ReportContext.jsx";
 // Section grouping mirrors the reference's nav (Audit Overview / Crawl
 // Analysis / Content & SEO / Visualizations). Only sections with at least
 // one built page are shown; more items join as later phases ship
-// (Page Speed, Security & Headers, Content Insights, Tech Detection, etc.)
-// — see docs/ROADMAP.md.
+// (Content Insights, Tech Detection, Crawl Analytics, etc.) — see docs/ROADMAP.md.
 const NAV_SECTIONS = [
   {
     label: "Audit Overview",
@@ -24,6 +23,7 @@ const NAV_SECTIONS = [
       { path: "/redirects", label: "Redirects", icon: Repeat },
       { path: "/content", label: "On-Page SEO", icon: FileText },
       { path: "/lighthouse", label: "Page Speed", icon: Gauge },
+      { path: "/security", label: "Security & Headers", icon: Shield, badge: "security" },
     ],
   },
 ];
@@ -32,6 +32,7 @@ export function Sidebar() {
   const location = useLocation();
   const { data } = useReport();
   const issueCount = data?.data?.categories?.reduce((n, c) => n + (c.issues?.length || 0), 0) ?? 0;
+  const securityCount = data?.data?.securityFindings?.length ?? 0;
 
   return (
     <aside className="flex w-60 flex-col border-r border-[#334155] bg-[#0F172A]">
@@ -54,7 +55,7 @@ export function Sidebar() {
               {section.items.map((item) => {
                 const Icon = item.icon;
                 const isActive = location.pathname.startsWith(item.path);
-                const badgeCount = item.badge === "issues" ? issueCount : 0;
+                const badgeCount = item.badge === "issues" ? issueCount : item.badge === "security" ? securityCount : 0;
 
                 return (
                   <Link
@@ -70,7 +71,9 @@ export function Sidebar() {
                       <Icon className="h-5 w-5" />
                       <span>{item.label}</span>
                     </span>
-                    {badgeCount > 0 && <Badge variant="destructive">{badgeCount}</Badge>}
+                    {badgeCount > 0 && (
+                      <Badge variant={item.badge === "security" ? "secondary" : "destructive"}>{badgeCount}</Badge>
+                    )}
                   </Link>
                 );
               })}

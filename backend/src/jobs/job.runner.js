@@ -3,6 +3,7 @@ import { checkSiteLevel } from "../analysis/siteLevel.js";
 import { checkLinks } from "../crawl/linkChecker.js";
 import { buildEdges } from "../graph/linkGraph.js";
 import { runLighthouseOnPages } from "../lighthouse/runner.js";
+import { runSecurityScan } from "../security/scanner.js";
 import { buildReport } from "../reporting/builder.js";
 import {
   insertReport,
@@ -96,6 +97,13 @@ async function runJob(jobId, url) {
     });
     insertLighthouseRuns(crawlRunId, lighthouseByUrl);
 
+    patchJob(jobId, {
+      status: "security_scan",
+      progress: { pagesCrawled: pages.length, pagesTotal: pages.length },
+    });
+
+    const securityFindings = await runSecurityScan(pages, url);
+
     patchJob(jobId, { status: "scoring", progress: { pagesCrawled: pages.length, pagesTotal: pages.length } });
 
     const report = buildReport({
@@ -106,6 +114,7 @@ async function runJob(jobId, url) {
       edges,
       externalLinkChecks,
       lighthouseByUrl,
+      securityFindings,
     });
 
     const reportId = insertReport({
