@@ -42,7 +42,7 @@ export function HorizontalBarChartCard({ title, subtitle, data, yWidth = 110, he
           <CartesianGrid strokeDasharray="3 3" stroke={gridColor} horizontal={false} />
           <XAxis type="number" allowDecimals={false} tick={tickStyle} />
           <YAxis type="category" dataKey="name" width={yWidth} tick={tickStyle} />
-          <Tooltip contentStyle={tooltipStyle} />
+          <Tooltip contentStyle={tooltipStyle} cursor={false} />
           <Bar dataKey="count" radius={[0, 4, 4, 0]}>
             {data.map((entry, index) => (
               <Cell key={entry.name} fill={entry.color || palette(index)} />
@@ -63,7 +63,7 @@ export function VerticalBarChartCard({ title, subtitle, data, height = 220 }) {
           <CartesianGrid strokeDasharray="3 3" stroke={gridColor} vertical={false} />
           <XAxis dataKey="name" tick={{ ...tickStyle, fontSize: 10 }} angle={-15} textAnchor="end" height={50} />
           <YAxis allowDecimals={false} tick={tickStyle} />
-          <Tooltip contentStyle={tooltipStyle} />
+          <Tooltip contentStyle={tooltipStyle} cursor={false} />
           <Bar dataKey="count" radius={[4, 4, 0, 0]}>
             {data.map((entry, index) => (
               <Cell key={entry.name} fill={entry.color || palette(index)} />
@@ -93,7 +93,7 @@ export function GroupedBarChartCard({
           <CartesianGrid strokeDasharray="3 3" stroke={gridColor} vertical={false} />
           <XAxis dataKey="name" tick={tickStyle} />
           <YAxis allowDecimals={false} tick={tickStyle} domain={yDomain} />
-          <Tooltip contentStyle={tooltipStyle} />
+          <Tooltip contentStyle={tooltipStyle} cursor={false} />
           <Legend wrapperStyle={{ fontSize: 12, color: "#94A3B8" }} />
           {seriesKeys.map((key, i) => (
             <Bar
@@ -122,7 +122,7 @@ export function DoughnutChartCard({ title, subtitle, data, height = 220 }) {
             ))}
           </Pie>
           <Legend verticalAlign="bottom" wrapperStyle={{ fontSize: 12, color: "#94A3B8" }} />
-          <Tooltip contentStyle={tooltipStyle} />
+          <Tooltip contentStyle={tooltipStyle} cursor={false} />
         </PieChart>
       </ResponsiveContainer>
     </ChartShell>
