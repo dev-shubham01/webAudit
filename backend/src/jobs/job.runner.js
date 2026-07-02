@@ -2,12 +2,14 @@ import { crawl } from "../crawl/crawler.js";
 import { checkSiteLevel } from "../analysis/siteLevel.js";
 import { checkLinks } from "../crawl/linkChecker.js";
 import { buildEdges } from "../graph/linkGraph.js";
+import { runLighthouseOnPages } from "../lighthouse/runner.js";
 import { buildReport } from "../reporting/builder.js";
 import {
   insertReport,
   insertCrawlRun,
   insertCrawlPages,
   insertEdges,
+  insertLighthouseRuns,
   updateCrawlRun,
 } from "../db/repository.js";
 import { createJob, patchJob } from "./job.store.js";
@@ -23,6 +25,18 @@ const CRAWL_OPTIONS = {
 // applied crawl-wide: only links that weren't themselves crawled (external,
 // or beyond depth/page limits) need a separate check.
 const MAX_OUTLINKS_TO_CHECK = 50;
+
+// Each Lighthouse run launches its own Chrome instance sequentially
+// (~15-20s/page), so this is capped well below the reference's
+// lighthouse_max_pages=20 default for reasonable crawl turnaround.
+const MAX_LIGHTHOUSE_PAGES = 5;
+
+function selectLighthousePages(pages) {
+  return pages
+    .filter((p) => p.status === 200)
+    .slice(0, MAX_LIGHTHOUSE_PAGES)
+    .map((p) => p.finalUrl || p.url);
+}
 
 function collectUncrawledOutlinks(pages) {
   const crawledUrls = new Set();
@@ -71,9 +85,28 @@ async function runJob(jobId, url) {
 
     updateCrawlRun(crawlRunId, { pagesCrawled: pages.length, crawlTimeS });
 
+    const lighthousePages = selectLighthousePages(pages);
+    patchJob(jobId, {
+      status: "lighthouse",
+      progress: { pagesCrawled: 0, pagesTotal: lighthousePages.length },
+    });
+
+    const lighthouseByUrl = await runLighthouseOnPages(lighthousePages, {}, {
+      onProgress: (progress) => patchJob(jobId, { status: "lighthouse", progress }),
+    });
+    insertLighthouseRuns(crawlRunId, lighthouseByUrl);
+
     patchJob(jobId, { status: "scoring", progress: { pagesCrawled: pages.length, pagesTotal: pages.length } });
 
-    const report = buildReport({ startUrl: url, pages, crawlTimeS, siteLevel, edges, externalLinkChecks });
+    const report = buildReport({
+      startUrl: url,
+      pages,
+      crawlTimeS,
+      siteLevel,
+      edges,
+      externalLinkChecks,
+      lighthouseByUrl,
+    });
 
     const reportId = insertReport({
       url,

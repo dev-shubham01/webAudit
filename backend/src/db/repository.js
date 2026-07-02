@@ -87,6 +87,19 @@ export function insertCrawlPages(crawlRunId, pages) {
   insertMany(pages);
 }
 
+export function insertLighthouseRuns(crawlRunId, byUrl) {
+  const entries = Object.entries(byUrl);
+  if (!entries.length) return;
+  const db = getDb();
+  const insert = db.prepare(
+    `INSERT OR REPLACE INTO lighthouse_runs (crawl_run_id, url, data) VALUES (?, ?, ?)`,
+  );
+  const insertMany = db.transaction((rows) => {
+    for (const [url, summary] of rows) insert.run(crawlRunId, url, JSON.stringify(summary));
+  });
+  insertMany(entries);
+}
+
 export function insertEdges(crawlRunId, edges) {
   if (!edges.length) return;
   const db = getDb();

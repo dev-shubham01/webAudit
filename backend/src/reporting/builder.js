@@ -72,12 +72,32 @@ function toLinkRecord(p, inDegree) {
  * Phase 2 with the internal link graph and outlink-checking results
  * (docs/FEATURES.md).
  */
-export function buildReport({ startUrl, pages, crawlTimeS, siteLevel, edges = [], externalLinkChecks = [] }) {
+export function buildReport({
+  startUrl,
+  pages,
+  crawlTimeS,
+  siteLevel,
+  edges = [],
+  externalLinkChecks = [],
+  lighthouseByUrl = {},
+}) {
   const inDegree = computeInDegree(edges);
   const externalBrokenLinks = externalLinkChecks.filter((l) => l.result === "broken");
   const unknownLinks = externalLinkChecks.filter((l) => l.result === "unknown");
 
-  const categories = buildCategories(pages, { siteLevel, startUrl, edges, externalBrokenLinks });
+  // Site-level summary defaults to whichever tested page comes first in
+  // crawl order (normally the homepage) — mirrors the reference's fallback
+  // of `data.lighthouse_summary` when no per-URL selection is active.
+  const lighthouseUrls = Object.keys(lighthouseByUrl);
+  const lighthouseSummary = lighthouseUrls.length ? lighthouseByUrl[lighthouseUrls[0]] : null;
+
+  const categories = buildCategories(pages, {
+    siteLevel,
+    startUrl,
+    edges,
+    externalBrokenLinks,
+    lighthouseSummary,
+  });
 
   const counts = { "2xx": 0, "3xx": 0, "4xx": 0, "5xx": 0, other: 0 };
   for (const p of pages) counts[statusClass(p.status)] += 1;
@@ -154,5 +174,9 @@ export function buildReport({ startUrl, pages, crawlTimeS, siteLevel, edges = []
     redirects,
     brokenLinks,
     unknownLinks,
+    lighthouseByUrl,
+    lighthouseSummary,
+    lighthouseHumanSummary: lighthouseSummary?.humanSummary || "",
+    lighthouseDiagnostics: lighthouseSummary?.diagnostics || [],
   };
 }

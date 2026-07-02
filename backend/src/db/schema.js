@@ -58,6 +58,14 @@ function createSchema(database) {
       PRIMARY KEY (crawl_run_id, from_url, to_url)
     );
     CREATE INDEX IF NOT EXISTS idx_edges_run ON edges (crawl_run_id);
+
+    CREATE TABLE IF NOT EXISTS lighthouse_runs (
+      crawl_run_id INTEGER NOT NULL,
+      url TEXT NOT NULL,
+      data TEXT NOT NULL,
+      PRIMARY KEY (crawl_run_id, url)
+    );
+    CREATE INDEX IF NOT EXISTS idx_lighthouse_runs_run ON lighthouse_runs (crawl_run_id);
   `);
 }
 

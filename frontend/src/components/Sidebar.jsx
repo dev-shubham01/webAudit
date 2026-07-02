@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router";
-import { LayoutDashboard, FileText, Activity, Link2, Repeat, AlertOctagon } from "lucide-react";
+import { LayoutDashboard, FileText, Activity, Link2, Repeat, AlertOctagon, Gauge } from "lucide-react";
 import { Avatar, AvatarFallback } from "./ui/avatar";
 import { Badge } from "./ui/badge";
 import { useReport } from "../context/ReportContext.jsx";
@@ -23,6 +23,7 @@ const NAV_SECTIONS = [
       { path: "/links", label: "Link Explorer", icon: Link2 },
       { path: "/redirects", label: "Redirects", icon: Repeat },
       { path: "/content", label: "On-Page SEO", icon: FileText },
+      { path: "/lighthouse", label: "Page Speed", icon: Gauge },
     ],
   },
 ];
