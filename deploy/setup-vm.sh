@@ -22,6 +22,9 @@ echo "==> Updating system packages"
 sudo apt-get update -y
 sudo apt-get upgrade -y
 
+echo "==> Installing git (minimal cloud images often don't include it)"
+sudo apt-get install -y git
+
 echo "==> Installing Node.js 22 (via NodeSource)"
 curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
 sudo apt-get install -y nodejs
