@@ -59,6 +59,25 @@ function collectUncrawledOutlinks(pages) {
   return [...uncrawled].slice(0, MAX_OUTLINKS_TO_CHECK);
 }
 
+// Crawls run one at a time on this VM: each job spawns its own Chrome
+// instances for Lighthouse, and running two concurrently is what crashed the
+// 1GB VM during testing. Extra jobs wait here (status stays "queued") instead
+// of starting immediately.
+const queue = [];
+let isProcessing = false;
+
+function processQueue() {
+  if (isProcessing) return;
+  const next = queue.shift();
+  if (!next) return;
+
+  isProcessing = true;
+  runJob(next.jobId, next.url).finally(() => {
+    isProcessing = false;
+    processQueue();
+  });
+}
+
 async function runJob(jobId, url) {
   try {
     patchJob(jobId, { status: "crawling", progress: { pagesCrawled: 0, pagesTotal: CRAWL_OPTIONS.maxPages } });
@@ -149,8 +168,10 @@ async function runJob(jobId, url) {
 export function startJob(url) {
   const job = createJob(url);
 
-  // Fire and forget: job.store holds progress, the client polls for it.
-  runJob(job.id, url);
+  // job.store holds progress, the client polls for it. The job waits in the
+  // queue (status "queued") until it's the only one running.
+  queue.push({ jobId: job.id, url });
+  processQueue();
 
   return job;
 }
