@@ -1,20 +1,23 @@
+import { lazy } from "react";
 import { createBrowserRouter } from "react-router-dom";
 import Root from "../layout/Root";
 import Landing from "../pages/Landing/Landing";
-import HomeGate from "../pages/Home/HomeGate.jsx";
-import DashboardGate from "../pages/Dashboard/DashboardGate.jsx";
-import ContentGate from "../pages/Content/ContentGate.jsx";
-import LinksGate from "../pages/Links/LinksGate.jsx";
-import RedirectsGate from "../pages/Redirects/RedirectsGate.jsx";
-import IssuesGate from "../pages/Issues/IssuesGate.jsx";
-import LighthouseGate from "../pages/Lighthouse/LighthouseGate.jsx";
-import SecurityGate from "../pages/Security/SecurityGate.jsx";
-import ContentInsightsGate from "../pages/ContentInsights/ContentInsightsGate.jsx";
-import TechStackGate from "../pages/TechStack/TechStackGate.jsx";
-import GalleryGate from "../pages/Gallery/GalleryGate.jsx";
-import NetworkGate from "../pages/Network/NetworkGate.jsx";
-import ChartsGate from "../pages/Charts/ChartsGate.jsx";
-import ReportsLab from "../pages/ReportsLab/ReportsLab.jsx";
+
+const HomeGate = lazy(() => import("../pages/Home/HomeGate.jsx"));
+const DashboardGate = lazy(() => import("../pages/Dashboard/DashboardGate.jsx"));
+const ContentGate = lazy(() => import("../pages/Content/ContentGate.jsx"));
+const LinksGate = lazy(() => import("../pages/Links/LinksGate.jsx"));
+const RedirectsGate = lazy(() => import("../pages/Redirects/RedirectsGate.jsx"));
+const IssuesGate = lazy(() => import("../pages/Issues/IssuesGate.jsx"));
+const LighthouseGate = lazy(() => import("../pages/Lighthouse/LighthouseGate.jsx"));
+const SecurityGate = lazy(() => import("../pages/Security/SecurityGate.jsx"));
+const ContentInsightsGate = lazy(() => import("../pages/ContentInsights/ContentInsightsGate.jsx"));
+const TechStackGate = lazy(() => import("../pages/TechStack/TechStackGate.jsx"));
+const GalleryGate = lazy(() => import("../pages/Gallery/GalleryGate.jsx"));
+const NetworkGate = lazy(() => import("../pages/Network/NetworkGate.jsx"));
+const ChartsGate = lazy(() => import("../pages/Charts/ChartsGate.jsx"));
+const ReportsLab = lazy(() => import("../pages/ReportsLab/ReportsLab.jsx"));
+
 const router = createBrowserRouter([
   {
     path: "/",
