@@ -3,8 +3,15 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { Search, Bell } from "lucide-react";
 import Input from "./ui/input";
 import Button from "./ui/button";
-import { Avatar, AvatarFallback } from "./ui/avatar";
+import { Avatar, AvatarImage, AvatarFallback } from "./ui/avatar";
 import { useReport } from "../context/ReportContext.jsx";
+import { useAuth } from "../context/AuthContext.jsx";
+
+function initials(name) {
+  if (!name) return "?";
+  const parts = name.trim().split(/\s+/);
+  return parts.length === 1 ? parts[0].slice(0, 2).toUpperCase() : (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}
 
 const URL_HELPER =
   "Enter any website URL to analyze performance, SEO, and errors";
@@ -12,6 +19,7 @@ const URL_HELPER =
 export function Navbar() {
   const [url, setUrl] = useState("");
   const { startNewCrawl, loading, data } = useReport();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -67,8 +75,9 @@ export function Navbar() {
           <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-[#EF4444]" />
         </Button>
         <Avatar className="h-8 w-8">
+          {user && <AvatarImage src={user.picture} alt={user.name} />}
           <AvatarFallback className="bg-[#6366F1] text-white text-sm">
-            JD
+            {initials(user?.name)}
           </AvatarFallback>
         </Avatar>
       </div>
