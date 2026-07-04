@@ -1,3 +1,4 @@
+import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import reportsRouter from "./jobs/job.routes.js";
