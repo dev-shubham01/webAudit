@@ -7,7 +7,7 @@ const Root=()=>{
 
     if(isLoading) return <Outlet/>;
     return (
-      <div className="flex h-screen bg-[#0F172A]">
+      <div className="flex h-screen bg-background">
         <Sidebar />
         <div className="flex flex-1 flex-col overflow-hidden">
           <Navbar />

@@ -20,12 +20,12 @@ function GalleryTile({ item, onOpen, masonry }) {
       onClick={() => onOpen(item)}
       className={`group text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60 ${
         masonry
-          ? "mb-3 block w-full break-inside-avoid overflow-hidden rounded-xl border border-[#334155] bg-[#1E293B]/60"
-          : "relative overflow-hidden rounded-xl border border-[#334155] bg-[#1E293B]/60"
+          ? "mb-3 block w-full break-inside-avoid overflow-hidden rounded-xl border border-border bg-card/60"
+          : "relative overflow-hidden rounded-xl border border-border bg-card/60"
       }`}
     >
       <div className="relative">
-        <div className={masonry ? "bg-[#020617]" : "flex aspect-[4/3] items-center justify-center bg-[#020617]"}>
+        <div className={masonry ? "bg-background-sunken" : "flex aspect-[4/3] items-center justify-center bg-background-sunken"}>
           {!broken ? (
             <img
               src={item.src}
@@ -41,7 +41,7 @@ function GalleryTile({ item, onOpen, masonry }) {
             />
           ) : (
             <div
-              className={`p-4 text-center text-xs text-[#94A3B8] ${
+              className={`p-4 text-center text-xs text-muted-foreground ${
                 masonry ? "flex min-h-[100px] flex-col items-center justify-center" : ""
               }`}
             >
@@ -133,8 +133,8 @@ export default function GalleryScreen({ report }) {
   return (
     <div className="space-y-8 pb-16">
       <div>
-        <h1 className="text-2xl font-semibold text-[#E2E8F0]">Gallery</h1>
-        <p className="mt-1 text-sm text-[#94A3B8]">
+        <h1 className="text-3xl font-bold text-foreground">Gallery</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
           Images discovered during the crawl: on-page assets, Open Graph, and Twitter images. Click any tile to
           enlarge.
         </p>
@@ -142,7 +142,7 @@ export default function GalleryScreen({ report }) {
 
       <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[#94A3B8]">
+          <span className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-muted-foreground">
             <Filter className="h-3.5 w-3.5" /> Source
           </span>
           {[
@@ -158,7 +158,7 @@ export default function GalleryScreen({ report }) {
               className={`rounded-lg border px-3 py-1.5 text-xs transition-colors ${
                 kindFilter === id
                   ? "border-blue-500/40 bg-blue-500/15 text-[#93C5FD]"
-                  : "border-[#334155] text-[#94A3B8] hover:bg-[#1E293B] hover:text-[#E2E8F0]"
+                  : "border-border text-muted-foreground hover:bg-card hover:text-foreground"
               }`}
             >
               {label}
@@ -168,13 +168,13 @@ export default function GalleryScreen({ report }) {
 
         <div className="flex flex-wrap items-center gap-3">
           <div className="flex items-center gap-2">
-            <span className="text-xs font-bold uppercase tracking-wider text-[#94A3B8]">Layout</span>
-            <div className="flex overflow-hidden rounded-lg border border-[#334155]">
+            <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Layout</span>
+            <div className="flex overflow-hidden rounded-lg border border-border">
               <button
                 type="button"
                 title="Grid"
                 onClick={() => setLayoutMode("grid")}
-                className={`p-2 ${layoutMode === "grid" ? "bg-violet-500/20 text-violet-300" : "text-[#94A3B8] hover:bg-[#1E293B]"}`}
+                className={`p-2 ${layoutMode === "grid" ? "bg-violet-500/20 text-violet-300" : "text-muted-foreground hover:bg-card"}`}
               >
                 <LayoutGrid className="h-4 w-4" />
               </button>
@@ -182,8 +182,8 @@ export default function GalleryScreen({ report }) {
                 type="button"
                 title="Masonry"
                 onClick={() => setLayoutMode("masonry")}
-                className={`border-l border-[#334155] p-2 ${
-                  layoutMode === "masonry" ? "bg-violet-500/20 text-violet-300" : "text-[#94A3B8] hover:bg-[#1E293B]"
+                className={`border-l border-border p-2 ${
+                  layoutMode === "masonry" ? "bg-violet-500/20 text-violet-300" : "text-muted-foreground hover:bg-card"
                 }`}
               >
                 <Columns className="h-4 w-4" />
@@ -191,13 +191,13 @@ export default function GalleryScreen({ report }) {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-xs font-bold uppercase tracking-wider text-[#94A3B8]">Grid</span>
-            <div className="flex overflow-hidden rounded-lg border border-[#334155]">
+            <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Grid</span>
+            <div className="flex overflow-hidden rounded-lg border border-border">
               <button
                 type="button"
                 title="Dense"
                 onClick={() => setDensity("sm")}
-                className={`p-2 ${density === "sm" ? "bg-blue-500/20 text-[#93C5FD]" : "text-[#94A3B8] hover:bg-[#1E293B]"}`}
+                className={`p-2 ${density === "sm" ? "bg-blue-500/20 text-[#93C5FD]" : "text-muted-foreground hover:bg-card"}`}
               >
                 <Grid3X3 className="h-4 w-4" />
               </button>
@@ -205,8 +205,8 @@ export default function GalleryScreen({ report }) {
                 type="button"
                 title="Balanced"
                 onClick={() => setDensity("md")}
-                className={`border-l border-[#334155] p-2 ${
-                  density === "md" ? "bg-blue-500/20 text-[#93C5FD]" : "text-[#94A3B8] hover:bg-[#1E293B]"
+                className={`border-l border-border p-2 ${
+                  density === "md" ? "bg-blue-500/20 text-[#93C5FD]" : "text-muted-foreground hover:bg-card"
                 }`}
               >
                 <LayoutGrid className="h-4 w-4" />
@@ -215,8 +215,8 @@ export default function GalleryScreen({ report }) {
                 type="button"
                 title="Large"
                 onClick={() => setDensity("lg")}
-                className={`border-l border-[#334155] p-2 ${
-                  density === "lg" ? "bg-blue-500/20 text-[#93C5FD]" : "text-[#94A3B8] hover:bg-[#1E293B]"
+                className={`border-l border-border p-2 ${
+                  density === "lg" ? "bg-blue-500/20 text-[#93C5FD]" : "text-muted-foreground hover:bg-card"
                 }`}
               >
                 <Maximize2 className="h-4 w-4" />
@@ -230,17 +230,17 @@ export default function GalleryScreen({ report }) {
         <HorizontalBarChartCard title="By source type" data={kindBreakdown} yWidth={90} height={140} />
       )}
 
-      <Card className="border-[#334155] bg-[#1E293B]">
+      <Card className="border-border bg-card">
         <CardContent className="flex flex-wrap gap-6 p-4 text-sm">
           <div>
-            <div className="mb-0.5 text-xs uppercase tracking-wider text-[#94A3B8]">Unique images</div>
-            <div className="text-2xl font-bold tabular-nums text-[#E2E8F0]">{items.length}</div>
+            <div className="mb-0.5 text-xs uppercase tracking-wider text-muted-foreground">Unique images</div>
+            <div className="text-2xl font-bold tabular-nums text-foreground">{items.length}</div>
           </div>
           <div>
-            <div className="mb-0.5 text-xs uppercase tracking-wider text-[#94A3B8]">Shown (filtered)</div>
+            <div className="mb-0.5 text-xs uppercase tracking-wider text-muted-foreground">Shown (filtered)</div>
             <div className="text-2xl font-bold tabular-nums text-[#CBD5E1]">{filtered.length}</div>
           </div>
-          <div className="max-w-xl text-xs leading-relaxed text-[#94A3B8]">
+          <div className="max-w-xl text-xs leading-relaxed text-muted-foreground">
             Crawled pages with page-analysis image URLs populate most tiles. OG and Twitter images are merged in
             when present.
           </div>
@@ -248,10 +248,10 @@ export default function GalleryScreen({ report }) {
       </Card>
 
       {filtered.length === 0 ? (
-        <Card className="border-[#334155] bg-[#1E293B]">
+        <Card className="border-border bg-card">
           <CardContent className="p-12 text-center">
-            <Images className="mx-auto mb-4 h-12 w-12 text-[#94A3B8]" />
-            <p className="text-[#94A3B8]">
+            <Images className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
+            <p className="text-muted-foreground">
               {items.length === 0
                 ? "No images found. Re-run the crawler with page analysis enabled so image URLs are captured per page."
                 : "No images match your filters."}
@@ -284,7 +284,7 @@ export default function GalleryScreen({ report }) {
             type="button"
             aria-label="Close"
             onClick={closeLightbox}
-            className="absolute right-4 top-4 z-10 rounded-lg border border-[#334155] bg-[#1E293B] p-2 text-[#E2E8F0] hover:bg-[#263449]"
+            className="absolute right-4 top-4 z-10 rounded-lg border border-border bg-card p-2 text-foreground hover:bg-[#263449]"
           >
             <X className="h-5 w-5" />
           </button>
@@ -292,25 +292,25 @@ export default function GalleryScreen({ report }) {
             className="flex max-h-[min(88vh,900px)] max-w-[min(96vw,1200px)] flex-col gap-4"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex min-h-[200px] items-center justify-center overflow-hidden rounded-xl border border-[#334155] bg-[#020617] shadow-2xl">
+            <div className="flex min-h-[200px] items-center justify-center overflow-hidden rounded-xl border border-border bg-background-sunken shadow-2xl">
               <img
                 src={lightbox.src}
                 alt=""
                 className="h-auto max-h-[min(70vh,720px)] w-auto max-w-full object-contain"
               />
             </div>
-            <Card className="border-[#334155] bg-[#1E293B]">
+            <Card className="border-border bg-card">
               <CardContent className="space-y-3 p-4">
                 <a
                   href={lightbox.src}
                   target="_blank"
                   rel="noreferrer"
-                  className="flex items-start gap-2 break-all font-mono text-sm text-[#6366F1] hover:underline"
+                  className="flex items-start gap-2 break-all font-mono text-sm text-link hover:underline"
                 >
                   <ExternalLink className="mt-0.5 h-4 w-4 shrink-0" />
                   {lightbox.src}
                 </a>
-                <div className="text-xs font-bold uppercase tracking-wider text-[#94A3B8]">Found on</div>
+                <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Found on</div>
                 <ul className="max-h-40 space-y-2 overflow-y-auto">
                   {lightbox.refs.map((r, i) => (
                     <li key={`${r.pageUrl}-${r.kind}-${i}`} className="flex flex-wrap items-center gap-2 text-sm">
@@ -318,11 +318,11 @@ export default function GalleryScreen({ report }) {
                         href={r.pageUrl}
                         target="_blank"
                         rel="noreferrer"
-                        className="max-w-full truncate text-[#6366F1] hover:underline sm:max-w-md"
+                        className="max-w-full truncate text-link hover:underline sm:max-w-md"
                       >
                         {r.pageUrl}
                       </a>
-                      <span className="rounded-full border border-[#334155] bg-[#1E293B] px-2 py-0.5 text-[10px] text-[#94A3B8]">
+                      <span className="rounded-full border border-border bg-card px-2 py-0.5 text-[10px] text-muted-foreground">
                         {KIND_LABELS[r.kind] || r.kind}
                       </span>
                     </li>

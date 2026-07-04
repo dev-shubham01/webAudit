@@ -1,6 +1,7 @@
-import { useState } from "react";
-import { X } from "lucide-react";
+import { useMemo, useState } from "react";
+import { ArrowLeft, Copy, Check, ExternalLink } from "lucide-react";
 import { Badge } from "../../components/ui/badge";
+import { Card } from "../../components/ui/card";
 import { INSPECTOR_TABS } from "./links.utils.js";
 
 const TITLE_LEN_MIN = 30;
@@ -10,11 +11,11 @@ const META_DESC_LEN_MAX = 160;
 
 function Field({ label, value }) {
   return (
-    <div className="flex items-start justify-between gap-4 border-b border-[#334155]/50 py-2 text-sm">
-      <span className="shrink-0 text-[#94A3B8]">{label}</span>
-      <span className="max-w-[70%] break-words text-right text-[#E2E8F0]">
+    <div className="flex items-start justify-between gap-4 border-b border-border/50 py-2 text-sm">
+      <span className="shrink-0 text-muted-foreground">{label}</span>
+      <span className="max-w-[70%] break-words text-right text-foreground">
         {value === "" || value === null || value === undefined ? (
-          <span className="text-[#64748B]">—</span>
+          <span className="text-muted-foreground">—</span>
         ) : typeof value === "boolean" ? (
           <Badge variant={value ? "outline" : "destructive"}>{value ? "Yes" : "No"}</Badge>
         ) : (
@@ -22,6 +23,39 @@ function Field({ label, value }) {
         )}
       </span>
     </div>
+  );
+}
+
+function CharBar({ length, min, max }) {
+  const pct = Math.min(100, (length / max) * 100);
+  const color = length === 0 ? "bg-red-500" : length < min || length > max ? "bg-yellow-500" : "bg-green-500";
+  return (
+    <div className="mt-1 flex items-center gap-2">
+      <div className="h-1.5 w-32 overflow-hidden rounded-full bg-border">
+        <div className={`h-full rounded-full ${color}`} style={{ width: `${Math.max(2, pct)}%` }} />
+      </div>
+      <span className="text-xs text-muted-foreground">
+        {length}/{max}
+      </span>
+    </div>
+  );
+}
+
+function CopyBtn({ text }) {
+  const [copied, setCopied] = useState(false);
+  return (
+    <button
+      type="button"
+      onClick={() => {
+        navigator.clipboard?.writeText(text || "");
+        setCopied(true);
+        setTimeout(() => setCopied(false), 1200);
+      }}
+      className="shrink-0 rounded p-1 text-muted-foreground hover:bg-card hover:text-foreground"
+      title="Copy to clipboard"
+    >
+      {copied ? <Check className="h-3.5 w-3.5 text-green-400" /> : <Copy className="h-3.5 w-3.5" />}
+    </button>
   );
 }
 
@@ -37,46 +71,83 @@ function h1Variant(count) {
   return "secondary";
 }
 
-function severityVariant(severity) {
-  if (severity === "high") return "destructive";
-  if (severity === "medium") return "secondary";
-  return "outline";
+function useAllIssuesFor(page, report) {
+  return useMemo(() => {
+    const url = page.url;
+    const items = [];
+    for (const w of page.warnings || []) {
+      items.push({ severity: w.severity || "info", message: w.message, detail: w.detail, source: "Page warning" });
+    }
+    for (const c of report.data.categories || []) {
+      for (const issue of c.issues || []) {
+        if (issue.url === url) {
+          items.push({ severity: (issue.priority || "info").toLowerCase(), message: issue.message, detail: issue.recommendation, source: c.name });
+        }
+      }
+    }
+    for (const f of report.data.securityFindings || []) {
+      if (f.url === url) {
+        items.push({ severity: (f.severity || "info").toLowerCase(), message: f.message, detail: f.recommendation, source: "Security" });
+      }
+    }
+    for (const b of report.data.brokenLinks || []) {
+      if (b.url === url) {
+        items.push({ severity: "high", message: `Broken link (status ${b.status})`, source: "Link health" });
+      }
+    }
+    return items;
+  }, [page, report]);
 }
 
-export default function LinkInspector({ page, onClose }) {
+export default function LinkInspector({ page, report, onClose }) {
   const [tab, setTab] = useState(INSPECTOR_TABS[0]);
+  const allIssues = useAllIssuesFor(page, report);
 
   return (
-    <div className="fixed inset-0 z-[90] flex items-center justify-center bg-black/60 p-4">
-      <div className="flex max-h-[85vh] w-full max-w-3xl flex-col rounded-xl border border-[#334155] bg-[#0F172A]">
-        <div className="flex items-start justify-between border-b border-[#334155] p-4">
-          <div className="min-w-0">
-            <p className="truncate text-sm font-medium text-[#E2E8F0]">{page.url}</p>
-            <p className="text-xs text-[#64748B]">Status {page.status} · Depth {page.depth}</p>
+    <div className="space-y-4">
+      <button
+        type="button"
+        onClick={onClose}
+        className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
+      >
+        <ArrowLeft className="h-4 w-4" /> Back to Explorer
+      </button>
+
+      <Card className="border-border bg-card">
+        <div className="flex items-start justify-between gap-4 border-b border-border p-4">
+          <div className="flex min-w-0 items-center gap-2">
+            <span className="truncate rounded-md bg-background px-2 py-1 font-mono text-sm text-foreground">{page.url}</span>
+            <CopyBtn text={page.url} />
+            <a href={page.url} target="_blank" rel="noreferrer" className="shrink-0 text-muted-foreground hover:text-link">
+              <ExternalLink className="h-4 w-4" />
+            </a>
           </div>
-          <button type="button" onClick={onClose} className="rounded-md p-1 text-[#94A3B8] hover:bg-[#1E293B]">
-            <X className="h-5 w-5" />
-          </button>
+          <p className="shrink-0 text-xs text-muted-foreground">
+            Status {page.status} · Depth {page.depth}
+          </p>
         </div>
 
-        <div className="flex flex-wrap gap-1 border-b border-[#334155] px-4 pt-2">
+        <div className="flex flex-wrap gap-1 border-b border-border px-4 pt-2">
           {INSPECTOR_TABS.map((t) => (
             <button
               key={t}
               type="button"
               onClick={() => setTab(t)}
-              className={`rounded-t-md px-3 py-2 text-xs font-medium ${
+              className={`flex items-center gap-1.5 rounded-t-md px-3 py-2 text-xs font-medium ${
                 tab === t
                   ? "border-b-2 border-[#6366F1] text-[#6366F1]"
-                  : "text-[#94A3B8] hover:text-[#E2E8F0]"
+                  : "text-muted-foreground hover:text-foreground"
               }`}
             >
               {t}
+              {t === "Issues" && allIssues.length > 0 && (
+                <span className="rounded-full bg-red-500/20 px-1.5 text-[10px] font-bold text-red-400">{allIssues.length}</span>
+              )}
             </button>
           ))}
         </div>
 
-        <div className="flex-1 overflow-y-auto p-4">
+        <div className="p-4">
           {tab === "Overview" && (
             <div>
               <Field label="Status" value={page.status} />
@@ -88,29 +159,35 @@ export default function LinkInspector({ page, onClose }) {
               <Field label="Reading Level" value={page.readingLevel ? `Grade ${page.readingLevel}` : null} />
               <Field label="Redirects" value={page.redirectChainLength} />
               <Field label="Content-Type" value={page.contentType} />
-              <div className="flex items-start justify-between gap-4 border-b border-[#334155]/50 py-2 text-sm">
-                <span className="shrink-0 text-[#94A3B8]">Title</span>
-                <span className="flex max-w-[70%] items-center gap-2 text-right text-[#E2E8F0]">
-                  <span className="truncate">{page.title || "Missing"}</span>
-                  <Badge variant={lengthVariant(page.title?.length || 0, TITLE_LEN_MIN, TITLE_LEN_MAX)}>
-                    {page.title?.length || 0}
-                  </Badge>
-                </span>
+              <div className="border-b border-border/50 py-2 text-sm">
+                <div className="flex items-start justify-between gap-4">
+                  <span className="shrink-0 text-muted-foreground">Title</span>
+                  <span className="flex max-w-[70%] items-center gap-2 text-right text-foreground">
+                    <span className="truncate">{page.title || "Missing"}</span>
+                    <CopyBtn text={page.title} />
+                  </span>
+                </div>
+                <div className="flex justify-end">
+                  <CharBar length={page.title?.length || 0} min={TITLE_LEN_MIN} max={TITLE_LEN_MAX} />
+                </div>
               </div>
-              <div className="flex items-start justify-between gap-4 border-b border-[#334155]/50 py-2 text-sm">
-                <span className="shrink-0 text-[#94A3B8]">Meta Description</span>
-                <span className="flex max-w-[70%] items-center gap-2 text-right text-[#E2E8F0]">
-                  <span className="truncate">{page.metaDescription || "Missing"}</span>
-                  <Badge variant={lengthVariant(page.metaDescriptionLen, META_DESC_LEN_MIN, META_DESC_LEN_MAX)}>
-                    {page.metaDescriptionLen}
-                  </Badge>
-                </span>
+              <div className="border-b border-border/50 py-2 text-sm">
+                <div className="flex items-start justify-between gap-4">
+                  <span className="shrink-0 text-muted-foreground">Meta Description</span>
+                  <span className="flex max-w-[70%] items-center gap-2 text-right text-foreground">
+                    <span className="truncate">{page.metaDescription || "Missing"}</span>
+                    <CopyBtn text={page.metaDescription} />
+                  </span>
+                </div>
+                <div className="flex justify-end">
+                  <CharBar length={page.metaDescriptionLen || 0} min={META_DESC_LEN_MIN} max={META_DESC_LEN_MAX} />
+                </div>
               </div>
               <div className="flex items-start justify-between gap-4 py-2 text-sm">
-                <span className="shrink-0 text-[#94A3B8]">H1</span>
+                <span className="shrink-0 text-muted-foreground">H1</span>
                 <span className="flex items-center gap-2">
                   <Badge variant={h1Variant(page.h1Count)}>{page.h1Count}</Badge>
-                  <span className="truncate text-[#E2E8F0]">{page.h1Text}</span>
+                  <span className="truncate text-foreground">{page.h1Text}</span>
                 </span>
               </div>
             </div>
@@ -148,7 +225,7 @@ export default function LinkInspector({ page, onClose }) {
               <Field label="Images missing alt" value={page.imagesWithoutAlt} />
               {page.topKeywords?.length > 0 && (
                 <div className="mt-3">
-                  <p className="mb-2 text-xs font-medium uppercase text-[#64748B]">Top keywords</p>
+                  <p className="mb-2 text-xs font-medium uppercase text-muted-foreground">Top keywords</p>
                   <div className="flex flex-wrap gap-2">
                     {page.topKeywords.map((kw) => (
                       <Badge key={kw.word} variant="outline">
@@ -178,23 +255,24 @@ export default function LinkInspector({ page, onClose }) {
 
           {tab === "Issues" && (
             <div className="space-y-2">
-              {(page.warnings || []).length === 0 ? (
-                <p className="text-sm text-[#94A3B8]">No warnings for this page.</p>
+              {allIssues.length === 0 ? (
+                <p className="text-sm text-muted-foreground">No issues found for this page.</p>
               ) : (
-                page.warnings.map((w) => (
-                  <div key={w.id} className="rounded-md border border-[#334155] p-3">
+                allIssues.map((w, idx) => (
+                  <div key={idx} className="rounded-md border border-border p-3">
                     <div className="flex items-center gap-2">
-                      <Badge variant={severityVariant(w.severity)}>{w.severity}</Badge>
-                      <p className="text-sm text-[#E2E8F0]">{w.message}</p>
+                      <Badge value={w.severity} label={w.severity} />
+                      <span className="text-xs uppercase text-muted-foreground">{w.source}</span>
                     </div>
-                    {w.detail && <p className="mt-1 text-xs text-[#94A3B8]">{w.detail}</p>}
+                    <p className="mt-1 text-sm text-foreground">{w.message}</p>
+                    {w.detail && <p className="mt-1 text-xs text-muted-foreground">{w.detail}</p>}
                   </div>
                 ))
               )}
             </div>
           )}
         </div>
-      </div>
+      </Card>
     </div>
   );
 }

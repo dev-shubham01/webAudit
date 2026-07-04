@@ -30,29 +30,29 @@ export default function QuickWinCard({ win, passed }) {
           <WinIcon iconKey={win.iconKey} />
         </div>
         <div className="min-w-0 flex-1">
-          <div className="text-sm font-semibold text-[#E2E8F0]">{win.title}</div>
+          <div className="text-sm font-semibold text-foreground">{win.title}</div>
           <div className={`mt-0.5 text-xs ${passed ? "text-green-400" : "text-amber-400"}`}>
             {passed ? "Passing" : "Needs attention"}
           </div>
         </div>
         <div className="flex shrink-0 items-center gap-2">
           {passed ? <CheckCircle className="h-5 w-5 text-green-400" /> : <XCircle className="h-5 w-5 text-amber-400" />}
-          {open ? <ChevronUp className="h-4 w-4 text-[#94A3B8]" /> : <ChevronDown className="h-4 w-4 text-[#94A3B8]" />}
+          {open ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
         </div>
       </button>
 
       {open && (
-        <div className="space-y-3 border-t border-[#334155] bg-[#0F172A] px-4 py-4">
+        <div className="space-y-3 border-t border-border bg-background px-4 py-4">
           <div>
-            <div className="mb-1 text-xs font-semibold text-[#94A3B8]">Why it matters</div>
-            <p className="text-sm text-[#E2E8F0]">{win.why}</p>
+            <div className="mb-1 text-xs font-semibold text-muted-foreground">Why it matters</div>
+            <p className="text-sm text-foreground">{win.why}</p>
           </div>
           <div>
-            <div className="mb-1 text-xs font-semibold text-[#94A3B8]">How to fix</div>
-            <p className="text-sm text-[#E2E8F0]">{win.how}</p>
+            <div className="mb-1 text-xs font-semibold text-muted-foreground">How to fix</div>
+            <p className="text-sm text-foreground">{win.how}</p>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-xs text-[#94A3B8]">Estimated impact:</span>
+            <span className="text-xs text-muted-foreground">Estimated impact:</span>
             <span className="text-xs font-semibold text-[#6366F1]">{win.impact}</span>
           </div>
         </div>

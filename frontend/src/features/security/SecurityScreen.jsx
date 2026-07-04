@@ -47,8 +47,8 @@ export default function SecurityScreen({ report }) {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold text-[#E2E8F0]">Security & Headers</h1>
-        <p className="mt-1 text-sm text-[#94A3B8]">
+        <h1 className="text-3xl font-bold text-foreground">Security & Headers</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
           HTTP security headers, injection risk, open redirect, and vulnerability findings. {allFindings.length}{" "}
           finding{allFindings.length !== 1 ? "s" : ""} total.
         </p>
@@ -56,21 +56,21 @@ export default function SecurityScreen({ report }) {
 
       {allFindings.length > 0 && (
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-          <Card className="border-[#334155] bg-[#1E293B]">
+          <Card className="border-border bg-card">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-[#E2E8F0]">Findings by severity</CardTitle>
+              <CardTitle className="text-sm font-medium text-foreground">Findings by severity</CardTitle>
               <p className="text-xs text-[#64748B]">All findings in this report</p>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={220}>
                 <PieChart>
-                  <Pie data={severityChartData} dataKey="value" nameKey="name" innerRadius={50} outerRadius={80}>
+                  <Pie data={severityChartData} dataKey="value" nameKey="name" innerRadius={50} outerRadius={80} isAnimationActive={false}>
                     {severityChartData.map((entry) => (
                       <Cell key={entry.name} fill={entry.color} />
                     ))}
                   </Pie>
                   <Legend verticalAlign="bottom" wrapperStyle={{ fontSize: 12, color: "#94A3B8" }} />
-                  <Tooltip contentStyle={{ background: "#0F172A", border: "1px solid #334155", fontSize: 12 }} />
+                  <Tooltip contentStyle={{ background: "#111827", border: "1px solid #334155", fontSize: 12 }} />
                 </PieChart>
               </ResponsiveContainer>
             </CardContent>
@@ -96,8 +96,9 @@ export default function SecurityScreen({ report }) {
           return (
             <Card
               key={sev}
+              shadow
               onClick={() => setSeverityFilter((prev) => (prev === sev ? "All" : sev))}
-              className={`cursor-pointer select-none border-[#334155] bg-[#1E293B] transition-all ${
+              className={`cursor-pointer select-none border-border bg-card transition-all ${
                 isActive ? `${cfg.ring || "ring-1 ring-neutral-500/20"} ${cfg.border}` : "hover:border-[#475569]"
               }`}
             >
@@ -105,7 +106,7 @@ export default function SecurityScreen({ report }) {
                 <div className={`mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wider ${cfg.text}`}>
                   <Icon className="h-4 w-4" /> {sev}
                 </div>
-                <div className={`text-3xl font-bold ${count > 0 ? cfg.text : "text-[#94A3B8]"}`}>{count}</div>
+                <div className={`text-3xl font-bold ${count > 0 ? cfg.text : "text-muted-foreground"}`}>{count}</div>
               </CardContent>
             </Card>
           );
@@ -116,19 +117,19 @@ export default function SecurityScreen({ report }) {
         <button
           type="button"
           onClick={() => setSeverityFilter("All")}
-          className="rounded-full border border-[#334155] px-3 py-1 text-xs text-[#94A3B8] transition-colors hover:text-[#E2E8F0]"
+          className="rounded-full border border-border px-3 py-1 text-xs text-muted-foreground transition-colors hover:text-foreground"
         >
           ← Show all severities
         </button>
       )}
 
       {findings.length === 0 ? (
-        <Card className="border-[#334155] bg-[#1E293B]">
+        <Card className="border-border bg-card">
           <CardContent className="flex flex-col items-center justify-center gap-4 py-20">
             <Shield className="h-14 w-14 text-green-600/60" />
             <div className="text-center">
-              <p className="text-base font-semibold text-[#E2E8F0]">No security findings detected</p>
-              <p className="mt-1 text-sm text-[#94A3B8]">
+              <p className="text-base font-semibold text-foreground">No security findings detected</p>
+              <p className="mt-1 text-sm text-muted-foreground">
                 {allFindings.length > 0
                   ? "No findings match the current filters or search."
                   : "Run a crawl with security scanning enabled to see results here."}
@@ -145,12 +146,12 @@ export default function SecurityScreen({ report }) {
             return (
               <div
                 key={i}
-                className={`flex flex-col gap-3 rounded-xl border border-[#334155] border-l-4 ${cfg.rowBorder} bg-[#1E293B] p-5 transition-colors hover:border-[#475569]`}
+                className={`flex flex-col gap-3 rounded-xl border border-border border-l-4 ${cfg.rowBorder} bg-card p-5 transition-colors hover:border-[#475569]`}
               >
                 <div className="flex flex-wrap items-start gap-3">
                   <div className="flex shrink-0 items-center gap-2">
                     <Icon className={`h-4 w-4 ${cfg.text}`} />
-                    <Badge variant="outline">{sev}</Badge>
+                    <Badge value={sev} label={sev} />
                   </div>
                   <span className={`select-all rounded border px-2 py-0.5 font-mono text-xs ${cfg.bg} ${cfg.text} ${cfg.border}`}>
                     {toTitleCase(f.findingType)}
@@ -167,9 +168,9 @@ export default function SecurityScreen({ report }) {
                     </a>
                   )}
                 </div>
-                <p className="text-sm leading-snug text-[#E2E8F0]">{f.message || "—"}</p>
+                <p className="text-sm leading-snug text-foreground">{f.message || "—"}</p>
                 {f.recommendation && (
-                  <div className={`rounded-lg border px-3 py-2.5 text-sm leading-relaxed text-[#94A3B8] ${cfg.recBg}`}>
+                  <div className={`rounded-lg border px-3 py-2.5 text-sm leading-relaxed text-muted-foreground ${cfg.recBg}`}>
                     <span className="mb-1 block text-xs font-bold uppercase tracking-wide text-[#6366F1]">
                       Recommendation
                     </span>

@@ -22,10 +22,10 @@ export default function ReportsLab() {
   }
 
   return (
-    <div className="space-y-6 text-[#E2E8F0]">
+    <div className="space-y-6 text-foreground">
       <div>
-        <h1 className="text-2xl font-semibold">Reports Lab (Phase 0)</h1>
-        <p className="mt-1 text-sm text-[#94A3B8]">
+        <h1 className="text-3xl font-bold">Reports Lab (Phase 0)</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
           Minimal end-to-end test of the job-based crawl API: enter a URL,
           start a job, and see the raw report JSON once it finishes.
         </p>
@@ -37,7 +37,7 @@ export default function ReportsLab() {
           value={url}
           onChange={(e) => setUrl(e.target.value)}
           placeholder="example.com"
-          className="flex-1 rounded-md border border-[#334155] bg-[#1E293B] px-3 py-2 text-sm text-[#E2E8F0] placeholder:text-[#64748B] focus:outline-none focus:ring-2 focus:ring-[#6366F1]"
+          className="flex-1 rounded-md border border-border bg-card px-3 py-2 text-sm text-foreground placeholder:text-[#64748B] focus:outline-none focus:ring-2 focus:ring-[#6366F1]"
         />
         <button
           type="submit"
@@ -49,8 +49,8 @@ export default function ReportsLab() {
       </form>
 
       {loading && (
-        <div className="flex items-center gap-3 text-sm text-[#94A3B8]">
-          <div className="h-4 w-4 animate-spin rounded-full border-2 border-[#334155] border-t-[#6366F1]" />
+        <div className="flex items-center gap-3 text-sm text-muted-foreground">
+          <div className="h-4 w-4 animate-spin rounded-full border-2 border-border border-t-[#6366F1]" />
           <span>Status: {jobStatus?.status ?? "starting"}...</span>
         </div>
       )}
@@ -62,7 +62,7 @@ export default function ReportsLab() {
       )}
 
       {data && (
-        <pre className="max-h-[70vh] overflow-auto rounded-md border border-[#334155] bg-[#0B1220] p-4 text-xs text-[#94A3B8]">
+        <pre className="max-h-[70vh] overflow-auto rounded-md border border-border bg-[#0B1220] p-4 text-xs text-muted-foreground">
           {JSON.stringify(data, null, 2)}
         </pre>
       )}

@@ -73,13 +73,13 @@ export default function MultiPageTable({ byUrl, selectedUrl, onSelect }) {
   return (
     <div className="overflow-x-auto">
       <table className="w-full text-sm">
-        <thead className="bg-[#0F172A] text-xs uppercase text-[#94A3B8]">
+        <thead className="bg-background text-xs uppercase text-muted-foreground">
           <tr>
             <th className="px-4 py-3 text-left">URL</th>
             {COLS.map((c) => (
               <th
                 key={c.id}
-                className="cursor-pointer select-none px-3 py-3 hover:text-[#E2E8F0]"
+                className="cursor-pointer select-none px-3 py-3 hover:text-foreground"
                 onClick={() => handleSort(c.id)}
               >
                 <div className="flex items-center justify-center gap-1">
@@ -98,7 +98,7 @@ export default function MultiPageTable({ byUrl, selectedUrl, onSelect }) {
             ))}
           </tr>
         </thead>
-        <tbody className="divide-y divide-[#334155]">
+        <tbody className="divide-y divide-border">
           {sorted.map((row, i) => {
             const isSelected = selectedUrl === row.url;
             return (
@@ -138,12 +138,12 @@ export default function MultiPageTable({ byUrl, selectedUrl, onSelect }) {
                           {val != null ? val : "—"}
                         </span>
                       ) : (
-                        <span className={`font-mono text-xs ${val != null ? metricColor : "text-[#94A3B8]"}`}>
+                        <span className={`font-mono text-xs ${val != null ? metricColor : "text-muted-foreground"}`}>
                           {val != null ? c.fmt(val) : "—"}
                         </span>
                       )}
                       {hoveredCell === cellId && c.isScore && val != null && (
-                        <div className="pointer-events-none absolute bottom-full left-1/2 z-50 mb-1 -translate-x-1/2 whitespace-nowrap rounded-lg border border-[#334155] bg-[#1E293B] px-2.5 py-1.5 text-xs text-[#E2E8F0] shadow-lg">
+                        <div className="pointer-events-none absolute bottom-full left-1/2 z-50 mb-1 -translate-x-1/2 whitespace-nowrap rounded-lg border border-border bg-card px-2.5 py-1.5 text-xs text-foreground shadow-lg">
                           {scoreTip(val)}
                         </div>
                       )}

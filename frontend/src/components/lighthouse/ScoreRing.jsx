@@ -24,10 +24,10 @@ export default function ScoreRing({ label, score }) {
           />
         </svg>
         <div className="absolute inset-0 flex items-center justify-center">
-          <span className="text-xl font-bold text-[#E2E8F0]">{displayScore}</span>
+          <span className="text-xl font-bold text-foreground">{displayScore}</span>
         </div>
       </div>
-      <span className="mt-2 text-center text-xs font-medium text-[#94A3B8]">{label}</span>
+      <span className="mt-2 text-center text-xs font-medium text-muted-foreground">{label}</span>
     </div>
   );
 }

@@ -110,11 +110,11 @@ export default function LighthouseScreen({ report }) {
     return (
       <div className="space-y-4">
         <div>
-          <h1 className="text-2xl font-semibold text-[#E2E8F0]">Page Speed</h1>
-          <p className="mt-1 text-sm text-[#94A3B8]">Core Web Vitals and performance audit results.</p>
+          <h1 className="text-3xl font-bold text-foreground">Page Speed</h1>
+          <p className="mt-1 text-sm text-muted-foreground">Core Web Vitals and performance audit results.</p>
         </div>
-        <Card className="border-[#334155] bg-[#1E293B]">
-          <CardContent className="p-8 text-center text-sm text-[#94A3B8]">
+        <Card className="border-border bg-card">
+          <CardContent className="p-8 text-center text-sm text-muted-foreground">
             No Lighthouse data yet. Run a crawl and regenerate the report to see results here.
           </CardContent>
         </Card>
@@ -133,35 +133,35 @@ export default function LighthouseScreen({ report }) {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="mb-2 text-2xl font-semibold text-[#E2E8F0]">Page Speed</h1>
+        <h1 className="mb-2 text-3xl font-bold text-foreground">Page Speed</h1>
         {summary.url && (
-          <p className="mb-1 truncate text-sm text-[#94A3B8]">
+          <p className="mb-1 truncate text-sm text-muted-foreground">
             <a href={summary.url} target="_blank" rel="noreferrer" className="break-all text-[#6366F1] hover:underline">
               {summary.url}
             </a>
           </p>
         )}
-        <Card className="mt-4 border-[#334155] bg-[#1E293B]">
+        <Card className="mt-4 border-border bg-card">
           <CardContent className="p-4">
-            <h3 className="mb-3 text-xs font-bold uppercase tracking-wider text-[#94A3B8]">Analysis settings</h3>
+            <h3 className="mb-3 text-xs font-bold uppercase tracking-wider text-muted-foreground">Analysis settings</h3>
             <div className="flex flex-wrap gap-6 text-sm">
               <div>
-                <span className="mb-0.5 block text-xs text-[#94A3B8]">Mode</span>
-                <span className="font-medium capitalize text-[#E2E8F0]">{mode}</span>
+                <span className="mb-0.5 block text-xs text-muted-foreground">Mode</span>
+                <span className="font-medium capitalize text-foreground">{mode}</span>
               </div>
               <div>
-                <span className="mb-0.5 block text-xs text-[#94A3B8]">Device</span>
-                <span className="font-medium capitalize text-[#E2E8F0]">{device}</span>
+                <span className="mb-0.5 block text-xs text-muted-foreground">Device</span>
+                <span className="font-medium capitalize text-foreground">{device}</span>
               </div>
               <div className="min-w-0">
-                <span className="mb-0.5 block text-xs text-[#94A3B8]">Categories</span>
-                <span className="font-medium text-[#E2E8F0]">
+                <span className="mb-0.5 block text-xs text-muted-foreground">Categories</span>
+                <span className="font-medium text-foreground">
                   {Array.isArray(categories) ? categories.map((c) => CATEGORY_LABELS[c] || c).join(", ") : ""}
                 </span>
               </div>
             </div>
             {(runTimestamp || iterations) && (
-              <p className="mt-3 border-t border-[#334155] pt-3 text-xs text-[#94A3B8]">
+              <p className="mt-3 border-t border-border pt-3 text-xs text-muted-foreground">
                 {iterations > 0 && <span>Runs: {iterations} (medians shown)</span>}
                 {runTimestamp && <span className="ml-3">Generated: {new Date(runTimestamp).toLocaleString()}</span>}
               </p>
@@ -172,9 +172,9 @@ export default function LighthouseScreen({ report }) {
 
       {hasMulti && (
         <div>
-          <h2 className="mb-2 text-xs font-bold uppercase tracking-wider text-[#94A3B8]">Multi-page comparison</h2>
-          <p className="mb-3 text-sm text-[#94A3B8]">Click any row to view its detailed breakdown below. Sort by any column.</p>
-          <Card className="border-[#334155] bg-[#1E293B]">
+          <h2 className="mb-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">Multi-page comparison</h2>
+          <p className="mb-3 text-sm text-muted-foreground">Click any row to view its detailed breakdown below. Sort by any column.</p>
+          <Card className="border-border bg-card">
             <CardContent className="overflow-hidden p-0">
               <MultiPageTable byUrl={byUrl} selectedUrl={displayUrl} onSelect={handleSelectUrl} />
             </CardContent>
@@ -184,13 +184,13 @@ export default function LighthouseScreen({ report }) {
 
       {hasMulti && (
         <div ref={detailRef}>
-          <h2 className="mb-2 text-xs font-bold uppercase tracking-wider text-[#94A3B8]">Detailed view</h2>
+          <h2 className="mb-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">Detailed view</h2>
           <div className="flex items-center gap-3">
-            <Globe className="h-4 w-4 shrink-0 text-[#94A3B8]" />
+            <Globe className="h-4 w-4 shrink-0 text-muted-foreground" />
             <select
               value={displayUrl || ""}
               onChange={(e) => setSelectedUrl(e.target.value)}
-              className="max-w-lg flex-1 rounded-lg border border-[#334155] bg-[#1E293B] px-3 py-2 text-sm text-[#E2E8F0] outline-none"
+              className="max-w-lg flex-1 rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground outline-none"
             >
               {urlList.map((url) => {
                 const sc = byUrl[url]?.categoryScores?.performance;
@@ -207,13 +207,13 @@ export default function LighthouseScreen({ report }) {
       )}
 
       <div>
-        <h2 className="mb-4 text-xs font-bold uppercase tracking-wider text-[#94A3B8]">Categories</h2>
+        <h2 className="mb-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">Categories</h2>
         <div className="flex flex-wrap items-center justify-start gap-6">
           {CATEGORIES.map(({ id, label }) => (
             <ScoreRing key={id} label={label} score={cs[id] != null ? Number(cs[id]) : null} />
           ))}
         </div>
-        <div className="mt-4 flex flex-wrap gap-6 text-xs text-[#94A3B8]">
+        <div className="mt-4 flex flex-wrap gap-6 text-xs text-muted-foreground">
           <span>
             <span className="mr-1 inline-block h-2 w-2 rounded-full bg-red-500" />
             0–49 Poor
@@ -230,8 +230,8 @@ export default function LighthouseScreen({ report }) {
       </div>
 
       {categoryScoreData.length === 0 ? (
-        <Card className="border-[#334155] bg-[#1E293B]">
-          <CardContent className="p-4 text-sm text-[#94A3B8]">No category scores</CardContent>
+        <Card className="border-border bg-card">
+          <CardContent className="p-4 text-sm text-muted-foreground">No category scores</CardContent>
         </Card>
       ) : (
         <HorizontalBarChartCard
@@ -243,14 +243,14 @@ export default function LighthouseScreen({ report }) {
       )}
 
       <div>
-        <h2 className="mb-2 text-xs font-bold uppercase tracking-wider text-[#94A3B8]">Metrics</h2>
-        <p className="mb-4 text-sm text-[#94A3B8]">
+        <h2 className="mb-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">Metrics</h2>
+        <p className="mb-4 text-sm text-muted-foreground">
           Hover any metric for threshold details. Bars fill relative to the good threshold. Medians from{" "}
           {iterations || 1} run(s).
         </p>
-        <Card className="border-[#334155] bg-[#1E293B]">
+        <Card className="border-border bg-card">
           <CardContent className="overflow-hidden p-0">
-            <div className="divide-y divide-[#334155]">
+            <div className="divide-y divide-border">
               {Object.keys(METRIC_THRESHOLDS).map((key) => (
                 <ThresholdBar key={key} metricKey={key} value={mm[key]} />
               ))}
@@ -260,8 +260,8 @@ export default function LighthouseScreen({ report }) {
       </div>
 
       <div>
-        <h2 className="mb-2 text-xs font-bold uppercase tracking-wider text-[#94A3B8]">Quick Wins</h2>
-        <p className="mb-4 text-sm text-[#94A3B8]">Click any card to see why it matters, how to fix it, and the estimated impact.</p>
+        <h2 className="mb-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">Quick Wins</h2>
+        <p className="mb-4 text-sm text-muted-foreground">Click any card to see why it matters, how to fix it, and the estimated impact.</p>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           {QUICK_WINS.map((win) => (
             <QuickWinCard key={win.id} win={win} passed={quickWinStatus[win.id] ?? false} />
@@ -270,18 +270,18 @@ export default function LighthouseScreen({ report }) {
       </div>
 
       {humanSummary && (
-        <Card className="border-[#334155] bg-[#1E293B]">
+        <Card className="border-border bg-card">
           <CardContent className="p-4">
-            <h2 className="mb-3 text-sm font-bold uppercase tracking-wider text-[#E2E8F0]">Summary</h2>
-            <pre className="whitespace-pre-wrap font-sans text-sm text-[#94A3B8]">{humanSummary}</pre>
+            <h2 className="mb-3 text-sm font-bold uppercase tracking-wider text-foreground">Summary</h2>
+            <pre className="whitespace-pre-wrap font-sans text-sm text-muted-foreground">{humanSummary}</pre>
           </CardContent>
         </Card>
       )}
 
       {failingAuditsDetailed.length > 0 && (
         <div>
-          <h2 className="mb-2 text-xs font-bold uppercase tracking-wider text-[#94A3B8]">Audit tables & previews</h2>
-          <p className="mb-3 text-sm text-[#94A3B8]">
+          <h2 className="mb-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">Audit tables & previews</h2>
+          <p className="mb-3 text-sm text-muted-foreground">
             Expand any row for full Lighthouse detail rows (thumbnails, resource URLs, DOM nodes).
           </p>
           <ul className="space-y-2">
@@ -293,13 +293,13 @@ export default function LighthouseScreen({ report }) {
       )}
 
       <div>
-        <h2 className="mb-2 text-xs font-bold uppercase tracking-wider text-[#94A3B8]">Diagnostics & Fixes</h2>
-        <p className="mb-4 text-sm text-[#94A3B8]">
+        <h2 className="mb-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">Diagnostics & Fixes</h2>
+        <p className="mb-4 text-sm text-muted-foreground">
           Issues grouped by impact area. Click a group to expand. Click any issue for full detail and evidence.
         </p>
         {diagnosticsList.length === 0 ? (
-          <Card className="border-[#334155] bg-[#1E293B]">
-            <CardContent className="p-6 text-center text-sm text-[#94A3B8]">
+          <Card className="border-border bg-card">
+            <CardContent className="p-6 text-center text-sm text-muted-foreground">
               No failing audits — all checks passed.
             </CardContent>
           </Card>

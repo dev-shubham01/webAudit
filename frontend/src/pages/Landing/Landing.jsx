@@ -44,7 +44,7 @@ const Landing = () => {
           <Link to="/dashboard">
             <Button
               variant="outline"
-              className="border-[#334155] text-[#E2E8F0] hover:bg-[#1E293B]"
+              className="border-border text-foreground hover:bg-card"
             >
               Sign In
             </Button>
@@ -57,7 +57,7 @@ const Landing = () => {
             AI-powered Website Health &<br />
             Debugging Platform
           </h1>
-          <p className="mx-auto mb-12 max-w-2xl text-lg text-[#94A3B8]">
+          <p className="mx-auto mb-12 max-w-2xl text-lg text-muted-foreground">
             Analyze your website's performance, SEO, errors, and security in
             real-time. Get AI-powered insights and automatic fixes to optimize
             your web presence.
@@ -65,7 +65,7 @@ const Landing = () => {
           <div className="mx-auto flex w-full max-w-2xl flex-col gap-2">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
               <div className="relative flex-1">
-                <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#94A3B8]" />
+                <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   type="url"
                   placeholder="https://yourwebsite.com"
@@ -74,7 +74,7 @@ const Landing = () => {
                   onKeyDown={(e) => {
                     if (e.key === "Enter") void handleAnalyze();
                   }}
-                  className="h-14 w-full rounded-xl border border-[#334155] bg-[#1E293B] pl-12 text-lg text-[#E2E8F0] placeholder:text-[#94A3B8] focus:border-[#6366F1] focus:ring-2 focus:ring-[#6366F1]"
+                  className="h-14 w-full rounded-xl border border-border bg-card pl-12 text-lg text-foreground placeholder:text-muted-foreground focus:border-[#6366F1] focus:ring-2 focus:ring-[#6366F1]"
                 />
               </div>
               <Button
@@ -99,7 +99,7 @@ const Landing = () => {
             return (
               <Card
                 key={feature.title}
-                className="border-[#334155] bg-[#1E293B]"
+                className="border-border bg-card"
               >
                 <CardContent className="p-6">
                   <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-[#6366F1]/10">
@@ -108,7 +108,7 @@ const Landing = () => {
                   <h3 className="mb-2 text-lg font-semibold text-white">
                     {feature.title}
                   </h3>
-                  <p className="text-sm text-[#94A3B8]">
+                  <p className="text-sm text-muted-foreground">
                     {feature.description}
                   </p>
                 </CardContent>
@@ -122,30 +122,30 @@ const Landing = () => {
           <h2 className="mb-4 text-3xl font-bold text-white">
             Powerful Dashboard Analytics
           </h2>
-          <p className="text-lg text-[#94A3B8]">
+          <p className="text-lg text-muted-foreground">
             Track your website's health metrics in real-time
           </p>
         </div>
-        <div className="overflow-hidden rounded-xl border border-[#334155] bg-gradient-to-br from-[#1E293B] to-[#0F172A] p-8">
+        <div className="overflow-hidden rounded-xl border border-border bg-gradient-to-br from-card to-background p-8">
           <div className="grid gap-4 md:grid-cols-3">
-            <Card className="border-[#334155] bg-[#0F172A]">
+            <Card className="border-border bg-background">
               <CardContent className="p-6 text-center">
                 <div className="text-4xl font-bold text-[#22C55E]">94</div>
-                <div className="mt-2 text-sm text-[#94A3B8]">
+                <div className="mt-2 text-sm text-muted-foreground">
                   Performance Score
                 </div>
               </CardContent>
             </Card>
-            <Card className="border-[#334155] bg-[#0F172A]">
+            <Card className="border-border bg-background">
               <CardContent className="p-6 text-center">
                 <div className="text-4xl font-bold text-[#6366F1]">87</div>
-                <div className="mt-2 text-sm text-[#94A3B8]">SEO Score</div>
+                <div className="mt-2 text-sm text-muted-foreground">SEO Score</div>
               </CardContent>
             </Card>
-            <Card className="border-[#334155] bg-[#0F172A]">
+            <Card className="border-border bg-background">
               <CardContent className="p-6 text-center">
                 <div className="text-4xl font-bold text-[#F59E0B]">91</div>
-                <div className="mt-2 text-sm text-[#94A3B8]">
+                <div className="mt-2 text-sm text-muted-foreground">
                   Stability Score
                 </div>
               </CardContent>
@@ -154,8 +154,8 @@ const Landing = () => {
         </div>
       </section>
 
-      <footer className="border-t border-[#334155] py-8">
-        <div className="mx-auto max-w-7xl px-8 text-center text-sm text-[#94A3B8]">
+      <footer className="border-t border-border py-8">
+        <div className="mx-auto max-w-7xl px-8 text-center text-sm text-muted-foreground">
           © 2026 WebHealth. Built for developers who care about performance.
         </div>
       </footer>

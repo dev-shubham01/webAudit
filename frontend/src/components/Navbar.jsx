@@ -29,11 +29,11 @@ export function Navbar() {
   };
 
   return (
-    <header className="flex min-h-16 flex-wrap items-center justify-between gap-4 border-b border-[#334155] bg-[#0F172A] px-8 py-3">
+    <header className="flex min-h-16 flex-wrap items-center justify-between gap-4 border-b border-border bg-background px-8 py-3">
       <div className="flex max-w-2xl flex-1 flex-col gap-1">
         <div className="flex items-center gap-4">
           <div className="relative min-w-0 flex-1">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#94A3B8]" />
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               type="text"
               placeholder="Enter website URL"
@@ -42,7 +42,7 @@ export function Navbar() {
               onKeyDown={(e) => {
                 if (e.key === "Enter") void handleAnalyze();
               }}
-              className="h-10 w-full rounded-lg border border-[#334155] bg-[#1E293B] pl-10 text-[#E2E8F0] placeholder:text-[#94A3B8] focus:border-[#6366F1] focus:ring-1 focus:ring-[#6366F1]"
+              className="h-10 w-full rounded-lg border border-border bg-card pl-10 text-foreground placeholder:text-muted-foreground focus:border-[#6366F1] focus:ring-1 focus:ring-[#6366F1]"
             />
           </div>
           <Button
@@ -61,7 +61,7 @@ export function Navbar() {
         <Button
           variant="ghost"
           size="icon"
-          className="relative h-9 w-9 text-[#94A3B8] hover:bg-[#1E293B] hover:text-[#E2E8F0]"
+          className="relative h-9 w-9 text-muted-foreground hover:bg-card hover:text-foreground"
         >
           <Bell className="h-5 w-5" />
           <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-[#EF4444]" />

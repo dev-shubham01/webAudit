@@ -144,12 +144,12 @@ export function ReportProvider({ children }) {
     <ReportContext.Provider value={value}>
       {loading && (
         <div
-          className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#0F172A]/60 backdrop-blur-md"
+          className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-background/60 backdrop-blur-md"
           aria-busy="true"
           aria-live="polite"
         >
-          <div className="h-10 w-10 animate-spin rounded-full border-2 border-[#334155] border-t-[#6366F1]" />
-          <p className="mt-6 text-lg font-medium text-[#E2E8F0]">
+          <div className="h-10 w-10 animate-spin rounded-full border-2 border-border border-t-[#6366F1]" />
+          <p className="mt-6 text-lg font-medium text-foreground">
             {jobStatus?.status ? `${jobStatus.status}...` : "Starting crawl..."}
           </p>
         </div>

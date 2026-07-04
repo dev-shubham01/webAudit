@@ -25,7 +25,7 @@ function Button({
       "bg-gray-200 text-gray-900 hover:bg-gray-300 active:bg-gray-400 disabled:hover:bg-gray-200";
   } else if (variant === "ghost") {
     variantClass =
-      "hover:bg-gray-100 active:bg-gray-200 dark:hover:bg-[#1E293B] dark:active:bg-[#334155] disabled:hover:bg-transparent";
+      "hover:bg-gray-100 active:bg-gray-200 dark:hover:bg-card dark:active:bg-border disabled:hover:bg-transparent";
   } else if (variant === "link") {
     variantClass =
       "text-blue-600 underline-offset-4 hover:underline disabled:hover:no-underline";

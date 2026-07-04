@@ -18,14 +18,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { palette, scoreBandColor } from "../../utils/chartPalette.js";
 
 const tickStyle = { fill: "#94A3B8", fontSize: 11 };
-const tooltipStyle = { background: "#0F172A", border: "1px solid #334155", fontSize: 12 };
-const gridColor = "rgba(100,116,139,0.3)";
+const tooltipStyle = { background: "#111827", border: "1px solid #334155", fontSize: 12 };
+const gridColor = "rgba(100,116,139,0.45)";
 
 function ChartShell({ title, subtitle, children }) {
   return (
-    <Card className="border-[#334155] bg-[#1E293B]">
+    <Card className="border-border bg-card">
       <CardHeader className="pb-2">
-        <CardTitle className="text-sm font-medium text-[#E2E8F0]">{title}</CardTitle>
+        <CardTitle className="text-sm font-medium text-foreground">{title}</CardTitle>
         {subtitle && <p className="text-xs text-[#64748B]">{subtitle}</p>}
       </CardHeader>
       <CardContent>{children}</CardContent>
@@ -43,7 +43,7 @@ export function HorizontalBarChartCard({ title, subtitle, data, yWidth = 110, he
           <XAxis type="number" allowDecimals={false} tick={tickStyle} />
           <YAxis type="category" dataKey="name" width={yWidth} tick={tickStyle} />
           <Tooltip contentStyle={tooltipStyle} cursor={false} />
-          <Bar dataKey="count" radius={[0, 4, 4, 0]}>
+          <Bar dataKey="count" radius={[0, 4, 4, 0]} isAnimationActive={false}>
             {data.map((entry, index) => (
               <Cell key={entry.name} fill={entry.color || palette(index)} />
             ))}
@@ -64,7 +64,7 @@ export function VerticalBarChartCard({ title, subtitle, data, height = 220 }) {
           <XAxis dataKey="name" tick={{ ...tickStyle, fontSize: 10 }} angle={-15} textAnchor="end" height={50} />
           <YAxis allowDecimals={false} tick={tickStyle} />
           <Tooltip contentStyle={tooltipStyle} cursor={false} />
-          <Bar dataKey="count" radius={[4, 4, 0, 0]}>
+          <Bar dataKey="count" radius={[4, 4, 0, 0]} isAnimationActive={false}>
             {data.map((entry, index) => (
               <Cell key={entry.name} fill={entry.color || palette(index)} />
             ))}
@@ -102,6 +102,7 @@ export function GroupedBarChartCard({
               fill={colors?.[i] || palette(i)}
               radius={stacked ? undefined : [4, 4, 0, 0]}
               stackId={stacked ? "stack" : undefined}
+              isAnimationActive={false}
             />
           ))}
         </BarChart>
@@ -116,7 +117,7 @@ export function DoughnutChartCard({ title, subtitle, data, height = 220 }) {
     <ChartShell title={title} subtitle={subtitle}>
       <ResponsiveContainer width="100%" height={height}>
         <PieChart>
-          <Pie data={data} dataKey="value" nameKey="name" innerRadius={50} outerRadius={80}>
+          <Pie data={data} dataKey="value" nameKey="name" innerRadius={50} outerRadius={80} isAnimationActive={false}>
             {data.map((entry, index) => (
               <Cell key={entry.name} fill={entry.color || palette(index)} />
             ))}
@@ -183,11 +184,11 @@ function xyTooltip(labelX, labelY, formatUrl) {
     const d = payload[0].payload;
     return (
       <div style={{ ...tooltipStyle, padding: "6px 10px", borderRadius: 6 }}>
-        {formatUrl && d.url && <div className="max-w-[220px] truncate text-[#E2E8F0]">{formatUrl(d.url)}</div>}
-        <div className="text-[#94A3B8]">
+        {formatUrl && d.url && <div className="max-w-[220px] truncate text-foreground">{formatUrl(d.url)}</div>}
+        <div className="text-muted-foreground">
           {labelX}: {d.x?.toLocaleString?.() ?? d.x}
         </div>
-        <div className="text-[#94A3B8]">
+        <div className="text-muted-foreground">
           {labelY}: {d.y?.toLocaleString?.() ?? d.y}
         </div>
       </div>
@@ -206,7 +207,7 @@ export function BubbleChartCard({ title, subtitle, data, xLabel, yLabel, color =
           <YAxis type="number" dataKey="y" name={yLabel} tick={tickStyle} label={{ value: yLabel, angle: -90, position: "insideLeft", fill: "#94A3B8", fontSize: 11 }} />
           <ZAxis type="number" dataKey="r" range={[16, 400]} />
           <Tooltip content={xyTooltip(xLabel, yLabel, (u) => String(u).replace(/^https?:\/\//, ""))} cursor={{ strokeDasharray: "3 3" }} />
-          <Scatter data={data} fill={color} fillOpacity={0.55} stroke={color} />
+          <Scatter data={data} fill={color} fillOpacity={0.55} stroke={color} isAnimationActive={false} />
         </ScatterChart>
       </ResponsiveContainer>
     </ChartShell>
@@ -223,7 +224,7 @@ export function ScatterChartCard({ title, subtitle, data, xLabel, yLabel, color 
           <XAxis type="number" dataKey="x" name={xLabel} tick={tickStyle} label={{ value: xLabel, position: "insideBottom", offset: -8, fill: "#94A3B8", fontSize: 11 }} />
           <YAxis type="number" dataKey="y" name={yLabel} tick={tickStyle} label={{ value: yLabel, angle: -90, position: "insideLeft", fill: "#94A3B8", fontSize: 11 }} />
           <Tooltip content={xyTooltip(xLabel, yLabel, (u) => String(u).replace(/^https?:\/\//, ""))} cursor={{ strokeDasharray: "3 3" }} />
-          <Scatter data={data} fill={color} fillOpacity={0.6} stroke={color} />
+          <Scatter data={data} fill={color} fillOpacity={0.6} stroke={color} isAnimationActive={false} />
         </ScatterChart>
       </ResponsiveContainer>
     </ChartShell>

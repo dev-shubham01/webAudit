@@ -49,8 +49,8 @@ export function Sidebar() {
   const securityCount = data?.data?.securityFindings?.length ?? 0;
 
   return (
-    <aside className="flex w-60 flex-col border-r border-[#334155] bg-[#0F172A]">
-      <div className="flex h-16 items-center border-b border-[#334155] px-6">
+    <aside className="flex w-60 flex-col border-r border-border bg-background">
+      <div className="flex h-16 items-center border-b border-border px-6">
         <Link to="/dashboard" className="flex items-center gap-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#6366F1]">
             <Activity className="h-5 w-5 text-white" />
@@ -78,7 +78,7 @@ export function Sidebar() {
                     className={`flex items-center justify-between gap-3 rounded-lg px-3 py-2 transition-colors ${
                       isActive
                         ? "bg-[#6366F1] text-white"
-                        : "text-[#94A3B8] hover:bg-[#1E293B] hover:text-[#E2E8F0]"
+                        : "text-muted-foreground hover:bg-card hover:text-foreground"
                     }`}
                   >
                     <span className="flex items-center gap-3">
@@ -96,16 +96,16 @@ export function Sidebar() {
         ))}
       </nav>
 
-      <div className="border-t border-[#334155] p-4">
-        <div className="flex items-center gap-3 rounded-lg p-2 hover:bg-[#1E293B]">
+      <div className="border-t border-border p-4">
+        <div className="flex items-center gap-3 rounded-lg p-2 hover:bg-card">
           <Avatar className="h-8 w-8">
             <AvatarFallback className="bg-[#6366F1] text-white text-sm">
               JD
             </AvatarFallback>
           </Avatar>
           <div className="flex-1 overflow-hidden">
-            <div className="truncate text-sm text-[#E2E8F0]">John Doe</div>
-            <div className="truncate text-xs text-[#94A3B8]">
+            <div className="truncate text-sm text-foreground">John Doe</div>
+            <div className="truncate text-xs text-muted-foreground">
               john@example.com
             </div>
           </div>

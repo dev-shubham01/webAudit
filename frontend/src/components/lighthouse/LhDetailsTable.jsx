@@ -19,7 +19,7 @@ function dataImageImg(src) {
     <img
       src={src}
       alt=""
-      className="max-h-24 max-w-[140px] rounded border border-[#334155] bg-[#020617] object-contain"
+      className="max-h-24 max-w-[140px] rounded border border-border bg-background-sunken object-contain"
       loading="lazy"
     />
   );
@@ -72,7 +72,7 @@ function HttpImagePreviewAndLink({ href }) {
           key={href}
           src={href}
           alt=""
-          className="block max-h-28 max-w-full rounded border border-[#334155] bg-[#020617] object-contain"
+          className="block max-h-28 max-w-full rounded border border-border bg-background-sunken object-contain"
           loading="lazy"
           decoding="async"
           onLoad={() => setLoadState("ok")}
@@ -80,7 +80,7 @@ function HttpImagePreviewAndLink({ href }) {
         />
       )}
       {loadState === "error" && (
-        <div className="rounded border border-dashed border-[#334155] bg-[#0F172A]/50 px-1 py-1.5 text-[10px] italic text-[#94A3B8]">
+        <div className="rounded border border-dashed border-border bg-background/50 px-1 py-1.5 text-[10px] italic text-muted-foreground">
           Inline preview blocked or failed to load; use the link below (hotlink/CORS policies on the image host).
         </div>
       )}
@@ -99,7 +99,7 @@ function HttpImageThumbOnly({ href }) {
       key={href}
       src={href}
       alt=""
-      className="mb-2 block max-h-20 max-w-[100px] rounded border border-[#334155] bg-[#020617] object-contain"
+      className="mb-2 block max-h-20 max-w-[100px] rounded border border-border bg-background-sunken object-contain"
       loading="lazy"
       decoding="async"
       onError={() => setFailed(true)}
@@ -118,13 +118,13 @@ function pickDataImageSrc(obj) {
 }
 
 function LhCell({ value, columnKey = "", valueType = "", row = null }) {
-  if (value == null || value === "") return <span className="text-[#94A3B8]">—</span>;
+  if (value == null || value === "") return <span className="text-muted-foreground">—</span>;
 
   if (typeof value === "string") {
     if (isDataImageUrl(value) && !isTruncatedDataUriForPreview(value)) return dataImageImg(value);
     if (isDataImageUrl(value) && isTruncatedDataUriForPreview(value)) {
       return (
-        <span className="break-all text-[10px] text-[#94A3B8]" title={value}>
+        <span className="break-all text-[10px] text-muted-foreground" title={value}>
           Data URI truncated in Lighthouse JSON (preview unavailable).{" "}
           <a href={value} target="_blank" rel="noreferrer" className="text-[#6366F1] hover:underline">
             Open raw value
@@ -145,7 +145,7 @@ function LhCell({ value, columnKey = "", valueType = "", row = null }) {
 
   if (typeof value === "number" || typeof value === "boolean") return <span>{String(value)}</span>;
 
-  if (Array.isArray(value)) return <span className="text-[#94A3B8]">{value.length} items</span>;
+  if (Array.isArray(value)) return <span className="text-muted-foreground">{value.length} items</span>;
 
   if (typeof value === "object") {
     if (value.type === "url" && typeof value.value === "string") {
@@ -205,9 +205,9 @@ function LhCell({ value, columnKey = "", valueType = "", row = null }) {
           {hasNode && (
             <div className="space-y-1">
               {rowImageForNodeCol && <HttpImageThumbOnly href={rowImageForNodeCol} />}
-              {label && <div className="text-[#E2E8F0]">{label}</div>}
+              {label && <div className="text-foreground">{label}</div>}
               {sel && <code className="block break-all text-[10px] text-amber-300">{sel}</code>}
-              {snip && <div className="line-clamp-3 font-mono text-[10px] text-[#94A3B8]">{snip}</div>}
+              {snip && <div className="line-clamp-3 font-mono text-[10px] text-muted-foreground">{snip}</div>}
             </div>
           )}
         </div>
@@ -217,7 +217,7 @@ function LhCell({ value, columnKey = "", valueType = "", row = null }) {
     if (imgSrc) return dataImageImg(imgSrc);
 
     return (
-      <pre className="max-h-24 max-w-md overflow-auto whitespace-pre-wrap text-[10px] text-[#94A3B8]">
+      <pre className="max-h-24 max-w-md overflow-auto whitespace-pre-wrap text-[10px] text-muted-foreground">
         {JSON.stringify(value, null, 0)}
       </pre>
     );
@@ -238,14 +238,14 @@ export default function LhDetailsTable({ headings, items, maxRows = 250 }) {
   if (!heads.length) return null;
 
   return (
-    <div className="overflow-x-auto rounded-lg border border-[#334155] bg-[#020617]/40">
+    <div className="overflow-x-auto rounded-lg border border-border bg-background-sunken/40">
       <table className="w-full text-left text-xs">
         <thead>
-          <tr className="border-b border-[#334155] bg-[#0F172A]/80">
+          <tr className="border-b border-border bg-background/80">
             {heads.map((h, hi) => (
               <th
                 key={h.key != null ? String(h.key) : `col-${hi}`}
-                className="whitespace-nowrap px-2 py-2 font-semibold text-[#94A3B8]"
+                className="whitespace-nowrap px-2 py-2 font-semibold text-muted-foreground"
               >
                 {typeof h.label === "string" ? h.label : h.label?.formattedDefault || h.key}
               </th>
@@ -254,7 +254,7 @@ export default function LhDetailsTable({ headings, items, maxRows = 250 }) {
         </thead>
         <tbody>
           {rows.map((row, ri) => (
-            <tr key={ri} className="border-b border-[#334155]/30 align-top hover:bg-[#0F172A]/30">
+            <tr key={ri} className="border-b border-border/30 align-top hover:bg-background/30">
               {heads.map((h, hi) => (
                 <td key={h.key != null ? String(h.key) : `cell-${ri}-${hi}`} className="px-2 py-2 align-top">
                   <LhCell
@@ -270,7 +270,7 @@ export default function LhDetailsTable({ headings, items, maxRows = 250 }) {
         </tbody>
       </table>
       {items.length > maxRows && (
-        <div className="border-t border-[#334155] px-2 py-1.5 text-[10px] text-[#94A3B8]">
+        <div className="border-t border-border px-2 py-1.5 text-[10px] text-muted-foreground">
           Showing {maxRows} of {items.length} rows
         </div>
       )}

@@ -10,31 +10,31 @@ export default function LhAuditExpandable({ audit }) {
   const hasTable = Array.isArray(items) && items.length > 0;
 
   return (
-    <li className="overflow-hidden rounded-xl border border-[#334155] bg-[#1E293B]/60">
+    <li className="overflow-hidden rounded-xl border border-border bg-card/60">
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="flex w-full items-start gap-2 px-3 py-2.5 text-left transition-colors hover:bg-[#1E293B]"
+        className="flex w-full items-start gap-2 px-3 py-2.5 text-left transition-colors hover:bg-card"
       >
         {open ? (
-          <ChevronDown className="mt-0.5 h-4 w-4 shrink-0 text-[#94A3B8]" />
+          <ChevronDown className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
         ) : (
-          <ChevronRight className="mt-0.5 h-4 w-4 shrink-0 text-[#94A3B8]" />
+          <ChevronRight className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
         )}
         <div className="min-w-0 flex-1">
-          <div className="text-sm font-medium text-[#E2E8F0]">{title}</div>
-          <div className="mt-0.5 font-mono text-[10px] text-[#94A3B8]">{audit.id}</div>
+          <div className="text-sm font-medium text-foreground">{title}</div>
+          <div className="mt-0.5 font-mono text-[10px] text-muted-foreground">{audit.id}</div>
           {audit.displayValue && <div className="mt-1 font-mono text-xs text-amber-300">{audit.displayValue}</div>}
         </div>
       </button>
       {open && (
-        <div className="space-y-3 border-t border-[#334155] px-3 pb-3 pt-1">
+        <div className="space-y-3 border-t border-border px-3 pb-3 pt-1">
           {audit.description && (
-            <p className="whitespace-pre-wrap text-xs leading-relaxed text-[#94A3B8]">{audit.description}</p>
+            <p className="whitespace-pre-wrap text-xs leading-relaxed text-muted-foreground">{audit.description}</p>
           )}
-          {audit.helpText && <p className="text-xs text-[#94A3B8]">{audit.helpText}</p>}
+          {audit.helpText && <p className="text-xs text-muted-foreground">{audit.helpText}</p>}
           {hasTable && <LhDetailsTable headings={headings} items={items} />}
-          {!hasTable && <p className="text-xs text-[#94A3B8]">No detail rows for this audit.</p>}
+          {!hasTable && <p className="text-xs text-muted-foreground">No detail rows for this audit.</p>}
         </div>
       )}
     </li>

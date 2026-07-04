@@ -142,46 +142,46 @@ export default function NetworkScreen({ report }) {
     <div className="flex h-full flex-col gap-6">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold text-[#E2E8F0]">Internal Linking Map</h1>
-          <p className="mt-1 text-sm text-[#94A3B8]">
+          <h1 className="text-3xl font-bold text-foreground">Internal Linking Map</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
             Physics-based graph of internal link structure. Red nodes indicate 4xx/5xx errors.
           </p>
         </div>
         {hasGraph && (
           <div className="relative w-64">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#94A3B8]" />
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               type="text"
               placeholder="Search pages..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="h-9 w-full rounded-lg border border-[#334155] bg-[#1E293B] pl-9 text-sm text-[#E2E8F0] placeholder:text-[#94A3B8] focus:border-[#6366F1] focus:ring-1 focus:ring-[#6366F1]"
+              className="h-9 w-full rounded-lg border border-border bg-card pl-9 text-sm text-foreground placeholder:text-muted-foreground focus:border-[#6366F1] focus:ring-1 focus:ring-[#6366F1]"
             />
           </div>
         )}
       </div>
 
       <div ref={wrapperRef} className="flex min-h-[80vh] flex-1 flex-col">
-        <div className="relative min-h-[80vh] flex-1 overflow-hidden rounded-xl border border-[#334155] bg-[#1E293B] shadow-lg">
+        <div className="relative min-h-[80vh] flex-1 overflow-hidden rounded-xl border border-border bg-card shadow-lg">
           {hasGraph ? (
             <>
               <div ref={containerRef} className="absolute inset-0 h-full w-full bg-[#05080f]" style={{ outline: "none" }} />
               {searchEmpty && (
-                <div className="absolute inset-0 z-20 flex items-center justify-center bg-[#05080f]/90 px-6 text-center text-sm text-[#94A3B8]">
+                <div className="absolute inset-0 z-20 flex items-center justify-center bg-[#05080f]/90 px-6 text-center text-sm text-muted-foreground">
                   No pages match your search.
                 </div>
               )}
-              <div className="absolute left-4 top-4 z-10 space-y-2 rounded-xl border border-[#334155] bg-[#0F172A] p-3 text-xs">
-                <div className="flex items-center gap-2 text-[#E2E8F0]">
+              <div className="absolute left-4 top-4 z-10 space-y-2 rounded-xl border border-border bg-background p-3 text-xs">
+                <div className="flex items-center gap-2 text-foreground">
                   <div className="h-3 w-3 rounded-full border border-blue-400 bg-blue-500" />
                   OK (2xx)
                 </div>
-                <div className="flex items-center gap-2 text-[#E2E8F0]">
+                <div className="flex items-center gap-2 text-foreground">
                   <div className="h-3 w-3 rounded-full border border-red-400 bg-red-500" />
                   Broken (4xx/5xx)
                 </div>
-                <div className="flex items-center gap-2 text-[#E2E8F0]">
-                  <div className="h-0.5 w-4 bg-[#334155]" />
+                <div className="flex items-center gap-2 text-foreground">
+                  <div className="h-0.5 w-4 bg-border" />
                   Internal Link
                 </div>
               </div>
@@ -189,14 +189,14 @@ export default function NetworkScreen({ report }) {
                 variant="secondary"
                 onClick={toggleFullscreen}
                 title={isFullscreen ? "Exit full screen" : "Full screen"}
-                className="absolute right-4 top-4 z-10 flex items-center gap-2 border border-[#334155] bg-[#0F172A] text-[#E2E8F0] hover:bg-[#1E293B]"
+                className="absolute right-4 top-4 z-10 flex items-center gap-2 border border-border bg-background text-foreground hover:bg-card"
               >
                 {isFullscreen ? <Minimize className="h-4 w-4" /> : <Maximize className="h-4 w-4" />}
                 {isFullscreen ? "Exit full screen" : "Full screen"}
               </Button>
             </>
           ) : (
-            <div className="absolute inset-0 flex items-center justify-center p-5 text-[#94A3B8]">
+            <div className="absolute inset-0 flex items-center justify-center p-5 text-muted-foreground">
               No edge data available.
             </div>
           )}

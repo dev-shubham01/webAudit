@@ -40,11 +40,11 @@ import {
 
 function SectionHeader({ icon: Icon, title }) {
   return (
-    <div className="flex items-start gap-3 border-b border-[#334155] pb-4">
-      <div className="rounded-lg border border-[#334155] bg-[#1E293B] p-2">
+    <div className="flex items-start gap-3 border-b border-border pb-4">
+      <div className="rounded-lg border border-border bg-card p-2">
         <Icon className="h-5 w-5 text-[#6366F1]" />
       </div>
-      <h2 className="text-lg font-bold text-[#E2E8F0]">{title}</h2>
+      <h2 className="text-lg font-bold text-foreground">{title}</h2>
     </div>
   );
 }
@@ -53,11 +53,11 @@ function CoverageBar({ label, pct, color }) {
   const safeP = Math.min(100, Math.max(0, pct ?? 0));
   return (
     <div className="space-y-1.5">
-      <div className="flex justify-between text-xs text-[#94A3B8]">
+      <div className="flex justify-between text-xs text-muted-foreground">
         <span className="font-medium">{label}</span>
         <span className={`font-bold ${color}`}>{safeP}%</span>
       </div>
-      <div className="h-2 overflow-hidden rounded-full bg-[#334155]">
+      <div className="h-2 overflow-hidden rounded-full bg-border">
         <div
           className={`h-full rounded-full transition-all duration-500 ${
             safeP >= 80 ? "bg-green-500" : safeP >= 50 ? "bg-amber-500" : "bg-red-500"
@@ -83,9 +83,9 @@ function ThinPagesSection({ pages }) {
         View {pages.length} thin page{pages.length !== 1 ? "s" : ""}
       </button>
       {open && (
-        <div className="mt-2 max-h-64 overflow-y-auto rounded-lg border border-[#334155]">
+        <div className="mt-2 max-h-64 overflow-y-auto rounded-lg border border-border">
           <table className="w-full text-left text-sm">
-            <thead className="sticky top-0 bg-[#0F172A]">
+            <thead className="sticky top-0 bg-background">
               <tr className="text-xs uppercase text-[#64748B]">
                 <th className="w-8 px-3 py-2 text-center">#</th>
                 <th className="px-3 py-2">URL</th>
@@ -94,7 +94,7 @@ function ThinPagesSection({ pages }) {
             </thead>
             <tbody>
               {pages.map((p, i) => (
-                <tr key={p.url} className="border-t border-[#334155]/50">
+                <tr key={p.url} className="border-t border-border/50">
                   <td className="px-3 py-2 text-center font-mono text-xs text-[#64748B]">{i + 1}</td>
                   <td className="max-w-[360px] truncate px-3 py-2">
                     <a
@@ -121,17 +121,17 @@ function ThinPagesSection({ pages }) {
 function UrlListCard({ icon: Icon, iconColor, title, urls }) {
   if (!urls.length) return null;
   return (
-    <Card className="border-[#334155] bg-[#1E293B]">
-      <div className="flex items-center gap-2 border-b border-[#334155] px-4 py-3">
+    <Card className="border-border bg-card">
+      <div className="flex items-center gap-2 border-b border-border px-4 py-3">
         <Icon className={`h-4 w-4 ${iconColor}`} />
-        <h3 className="text-sm font-bold text-[#E2E8F0]">{title}</h3>
-        <span className="ml-auto rounded-full bg-[#334155]/60 px-2.5 py-0.5 text-xs font-bold text-[#94A3B8]">
+        <h3 className="text-sm font-bold text-foreground">{title}</h3>
+        <span className="ml-auto rounded-full bg-border/60 px-2.5 py-0.5 text-xs font-bold text-muted-foreground">
           {urls.length}
         </span>
       </div>
       <div className="max-h-80 overflow-y-auto">
         <table className="w-full text-left text-sm">
-          <thead className="sticky top-0 bg-[#0F172A]">
+          <thead className="sticky top-0 bg-background">
             <tr className="text-xs uppercase text-[#64748B]">
               <th className="w-8 px-3 py-2 text-center">#</th>
               <th className="px-3 py-2">URL</th>
@@ -139,7 +139,7 @@ function UrlListCard({ icon: Icon, iconColor, title, urls }) {
           </thead>
           <tbody>
             {urls.slice(0, 50).map((u, i) => (
-              <tr key={u} className="border-t border-[#334155]/50">
+              <tr key={u} className="border-t border-border/50">
                 <td className="px-3 py-2 text-center font-mono text-xs text-[#64748B]">{i + 1}</td>
                 <td className="max-w-[360px] truncate px-3 py-2">
                   <a
@@ -297,60 +297,60 @@ export default function ContentAnalyticsScreen({ report }) {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-semibold text-[#E2E8F0]">Content Insights</h1>
-        <p className="mt-1 text-sm text-[#94A3B8]">
+        <h1 className="text-3xl font-bold text-foreground">Content Insights</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
           Word count, readability, content-to-HTML ratio, top keywords, social meta coverage, crawl health, and
           on-page flags.
         </p>
       </div>
 
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-5">
-        <Card className="border-[#334155] bg-[#1E293B]">
+        <Card className="border-border bg-card">
           <CardContent className="p-4">
-            <div className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#94A3B8]">
+            <div className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">
               <BookOpen className="h-4 w-4" /> Mean Words
             </div>
-            <div className="text-3xl font-bold text-[#E2E8F0]">{Math.round(wcStats.mean).toLocaleString()}</div>
+            <div className="text-3xl font-bold text-foreground">{Math.round(wcStats.mean).toLocaleString()}</div>
             <div className="mt-1 text-xs text-[#64748B]">per page</div>
           </CardContent>
         </Card>
-        <Card className="border-[#334155] bg-[#1E293B]">
+        <Card className="border-border bg-card">
           <CardContent className="p-4">
-            <div className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#94A3B8]">
+            <div className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">
               <FileText className="h-4 w-4" /> Median Words
             </div>
-            <div className="text-3xl font-bold text-[#E2E8F0]">{Math.round(wcStats.median).toLocaleString()}</div>
+            <div className="text-3xl font-bold text-foreground">{Math.round(wcStats.median).toLocaleString()}</div>
             <div className="mt-1 text-xs text-[#64748B]">per page</div>
           </CardContent>
         </Card>
-        <Card className="border-[#334155] bg-[#1E293B]">
+        <Card className="border-border bg-card">
           <CardContent className="p-4">
-            <div className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#94A3B8]">
+            <div className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">
               <Globe className="h-4 w-4 text-[#6366F1]" /> OG Coverage
             </div>
             <div className="text-3xl font-bold text-[#6366F1]">{social.ogCoveragePct}%</div>
             <div className="mt-1 text-xs text-[#64748B]">open graph tags</div>
           </CardContent>
         </Card>
-        <Card className="border-[#334155] bg-[#1E293B]">
+        <Card className="border-border bg-card">
           <CardContent className="p-4">
-            <div className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#94A3B8]">
+            <div className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">
               <TwitterIcon className="h-4 w-4 text-sky-400" /> Twitter Coverage
             </div>
             <div className="text-3xl font-bold text-sky-400">{social.twitterCoveragePct}%</div>
             <div className="mt-1 text-xs text-[#64748B]">twitter card tags</div>
           </CardContent>
         </Card>
-        <Card className={`border-[#334155] bg-[#1E293B] ${thinPages.length > 0 ? "ring-1 ring-amber-500/20" : ""}`}>
+        <Card className={`border-border bg-card ${thinPages.length > 0 ? "ring-1 ring-amber-500/20" : ""}`}>
           <CardContent className="p-4">
             <div
               className={`mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wider ${
-                thinPages.length > 0 ? "text-amber-400" : "text-[#94A3B8]"
+                thinPages.length > 0 ? "text-amber-400" : "text-muted-foreground"
               }`}
             >
               <AlertTriangle className="h-4 w-4" /> Thin Pages
             </div>
-            <div className={`text-3xl font-bold ${thinPages.length > 0 ? "text-amber-400" : "text-[#94A3B8]"}`}>
+            <div className={`text-3xl font-bold ${thinPages.length > 0 ? "text-amber-400" : "text-muted-foreground"}`}>
               {thinPages.length}
             </div>
             <div className="mt-1 text-xs text-[#64748B]">under 300 words</div>
@@ -361,23 +361,23 @@ export default function ContentAnalyticsScreen({ report }) {
       {(hreflang.pages200 > 0 || outboundDomains.length > 0) && (
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           {hreflang.pages200 > 0 && (
-            <Card className="border-[#334155] bg-[#1E293B]">
+            <Card className="border-border bg-card">
               <CardContent className="p-4">
                 <div className="mb-3 flex items-center gap-2">
                   <Globe className="h-4 w-4 text-sky-400" />
-                  <h3 className="text-sm font-bold text-[#E2E8F0]">Internationalization (crawl)</h3>
+                  <h3 className="text-sm font-bold text-foreground">Internationalization (crawl)</h3>
                 </div>
                 <div className="grid grid-cols-2 gap-3 text-sm">
-                  <div className="rounded-lg border border-[#334155] bg-[#0F172A] p-3">
-                    <div className="text-xs uppercase tracking-wider text-[#94A3B8]">2xx pages</div>
-                    <div className="text-xl font-bold text-[#E2E8F0]">{hreflang.pages200}</div>
+                  <div className="rounded-lg border border-border bg-background p-3">
+                    <div className="text-xs uppercase tracking-wider text-muted-foreground">2xx pages</div>
+                    <div className="text-xl font-bold text-foreground">{hreflang.pages200}</div>
                   </div>
-                  <div className="rounded-lg border border-[#334155] bg-[#0F172A] p-3">
-                    <div className="text-xs uppercase tracking-wider text-[#94A3B8]">Missing &lt;html lang&gt;</div>
+                  <div className="rounded-lg border border-border bg-background p-3">
+                    <div className="text-xs uppercase tracking-wider text-muted-foreground">Missing &lt;html lang&gt;</div>
                     <div className="text-xl font-bold text-amber-400">{hreflang.pagesMissingHtmlLang}</div>
                   </div>
-                  <div className="col-span-2 rounded-lg border border-[#334155] bg-[#0F172A] p-3">
-                    <div className="text-xs uppercase tracking-wider text-[#94A3B8]">Pages with hreflang alternates</div>
+                  <div className="col-span-2 rounded-lg border border-border bg-background p-3">
+                    <div className="text-xs uppercase tracking-wider text-muted-foreground">Pages with hreflang alternates</div>
                     <div className="text-xl font-bold text-sky-400">{hreflang.pagesWithHreflangLinks}</div>
                   </div>
                 </div>
@@ -385,15 +385,15 @@ export default function ContentAnalyticsScreen({ report }) {
             </Card>
           )}
           {outboundDomains.length > 0 && (
-            <Card className={`border-[#334155] bg-[#1E293B] ${hreflang.pages200 ? "" : "lg:col-span-2"}`}>
+            <Card className={`border-border bg-card ${hreflang.pages200 ? "" : "lg:col-span-2"}`}>
               <CardContent className="p-4">
                 <div className="mb-3 flex items-center gap-2">
                   <Link2 className="h-4 w-4 text-orange-400" />
-                  <h3 className="text-sm font-bold text-[#E2E8F0]">Outbound link domains</h3>
+                  <h3 className="text-sm font-bold text-foreground">Outbound link domains</h3>
                 </div>
-                <div className="max-h-64 overflow-y-auto rounded-lg border border-[#334155]">
+                <div className="max-h-64 overflow-y-auto rounded-lg border border-border">
                   <table className="w-full text-left text-sm">
-                    <thead className="sticky top-0 bg-[#0F172A]">
+                    <thead className="sticky top-0 bg-background">
                       <tr className="text-xs uppercase text-[#64748B]">
                         <th className="px-3 py-2">Host</th>
                         <th className="px-3 py-2 text-right">Links</th>
@@ -402,10 +402,10 @@ export default function ContentAnalyticsScreen({ report }) {
                     </thead>
                     <tbody>
                       {outboundDomains.map((row) => (
-                        <tr key={row.host} className="border-t border-[#334155]/50">
-                          <td className="px-3 py-2 font-mono text-xs text-[#E2E8F0]">{row.host}</td>
-                          <td className="px-3 py-2 text-right font-mono text-xs tabular-nums text-[#94A3B8]">{row.linkCount}</td>
-                          <td className="px-3 py-2 text-right font-mono text-xs tabular-nums text-[#94A3B8]">{row.pageCount}</td>
+                        <tr key={row.host} className="border-t border-border/50">
+                          <td className="px-3 py-2 font-mono text-xs text-foreground">{row.host}</td>
+                          <td className="px-3 py-2 text-right font-mono text-xs tabular-nums text-muted-foreground">{row.linkCount}</td>
+                          <td className="px-3 py-2 text-right font-mono text-xs tabular-nums text-muted-foreground">{row.pageCount}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -472,7 +472,7 @@ export default function ContentAnalyticsScreen({ report }) {
       )}
 
       {thinPages.length > 0 && (
-        <Card className="border-[#334155] bg-[#1E293B]">
+        <Card className="border-border bg-card">
           <CardContent className="p-4">
             <div className="mb-2 flex items-center gap-2">
               <AlertTriangle className="h-4 w-4 text-amber-400" />
@@ -494,8 +494,8 @@ export default function ContentAnalyticsScreen({ report }) {
           {kwChartData.length > 0 ? (
             <HorizontalBarChartCard title="Top 30 Keywords (Site-Wide)" data={kwChartData} yWidth={100} height={448} />
           ) : (
-            <Card className="border-[#334155] bg-[#1E293B]">
-              <CardContent className="flex h-64 items-center justify-center p-4 text-sm text-[#94A3B8]">No keyword data</CardContent>
+            <Card className="border-border bg-card">
+              <CardContent className="flex h-64 items-center justify-center p-4 text-sm text-muted-foreground">No keyword data</CardContent>
             </Card>
           )}
           {hasWcPercBar && (
@@ -513,8 +513,8 @@ export default function ContentAnalyticsScreen({ report }) {
             {h1ChartData.length > 0 ? (
               <DoughnutChartCard title="H1 Tag Distribution" data={h1ChartData} height={220} />
             ) : (
-              <Card className="border-[#334155] bg-[#1E293B]">
-                <CardContent className="flex h-56 items-center justify-center p-4 text-sm text-[#94A3B8]">No data</CardContent>
+              <Card className="border-border bg-card">
+                <CardContent className="flex h-56 items-center justify-center p-4 text-sm text-muted-foreground">No data</CardContent>
               </Card>
             )}
             <VerticalBarChartCard title="Title Tag Length Quality" data={titleQualData} height={220} />
@@ -543,7 +543,7 @@ export default function ContentAnalyticsScreen({ report }) {
       <div className="space-y-6">
         <SectionHeader icon={Share2} title="Social Meta Coverage" />
 
-        <Card className="border-[#334155] bg-[#1E293B]">
+        <Card className="border-border bg-card">
           <CardContent className="space-y-4 p-4">
             <CoverageBar label="Open Graph Coverage" pct={social.ogCoveragePct} color="text-[#6366F1]" />
             <CoverageBar label="Twitter Card Coverage" pct={social.twitterCoveragePct} color="text-sky-400" />
@@ -571,10 +571,10 @@ export default function ContentAnalyticsScreen({ report }) {
           <UrlListCard icon={Globe} iconColor="text-[#6366F1]" title="Missing Open Graph Tags" urls={social.missingOg} />
           <UrlListCard icon={TwitterIcon} iconColor="text-sky-400" title="Missing Twitter Card Tags" urls={social.missingTwitter} />
           {social.missingOg.length === 0 && social.missingTwitter.length === 0 && (
-            <Card className="border-[#334155] bg-[#1E293B] lg:col-span-2">
+            <Card className="border-border bg-card lg:col-span-2">
               <CardContent className="flex items-center gap-3 p-6">
                 <Share2 className="h-8 w-8 text-green-500" />
-                <p className="text-sm text-[#94A3B8]">
+                <p className="text-sm text-muted-foreground">
                   All pages have social meta tags, or no data available yet. Run a crawl to populate.
                 </p>
               </CardContent>
@@ -594,26 +594,26 @@ export default function ContentAnalyticsScreen({ report }) {
               height={260}
             />
             {wcStats.median > 0 && (
-              <Card className="border-[#334155] bg-[#1E293B]">
+              <Card className="border-border bg-card">
                 <CardContent className="p-4">
-                  <h3 className="mb-3 text-sm font-bold text-[#E2E8F0]">Word Count Percentiles</h3>
+                  <h3 className="mb-3 text-sm font-bold text-foreground">Word Count Percentiles</h3>
                   <div className="space-y-3">
                     {[
-                      { label: "Min", value: wcStats.min, color: "text-[#94A3B8]" },
+                      { label: "Min", value: wcStats.min, color: "text-muted-foreground" },
                       { label: "25th Percentile (P25)", value: wcStats.p25, color: "text-amber-400" },
                       { label: "Median (P50)", value: wcStats.median, color: "text-[#6366F1]" },
                       { label: "Mean (Avg)", value: wcStats.mean, color: "text-purple-400" },
                       { label: "75th Percentile (P75)", value: wcStats.p75, color: "text-green-400" },
-                      { label: "Max", value: wcStats.max, color: "text-[#E2E8F0]" },
+                      { label: "Max", value: wcStats.max, color: "text-foreground" },
                     ].map(({ label, value, color }) => {
                       const pct = wcStats.max > 0 ? Math.min(100, (value / wcStats.max) * 100) : 0;
                       return (
                         <div key={label} className="space-y-0.5">
                           <div className="flex justify-between text-xs">
-                            <span className="text-[#94A3B8]">{label}</span>
+                            <span className="text-muted-foreground">{label}</span>
                             <span className={`font-bold tabular-nums ${color}`}>{Math.round(value).toLocaleString()}</span>
                           </div>
-                          <div className="h-1.5 overflow-hidden rounded-full bg-[#334155]">
+                          <div className="h-1.5 overflow-hidden rounded-full bg-border">
                             <div className={`h-full rounded-full ${color.replace("text-", "bg-")}`} style={{ width: `${Math.min(100, Math.max(2, pct))}%` }} />
                           </div>
                         </div>
