@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Search, Bell } from "lucide-react";
+import { Search, Download } from "lucide-react";
 import Input from "./ui/input";
 import Button from "./ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "./ui/avatar";
@@ -36,6 +36,19 @@ export function Navbar() {
     }
   };
 
+  const canDownload = Boolean(user) && Boolean(data);
+  const downloadTitle = !user
+    ? "Sign in to download report"
+    : !data
+      ? "No report to download yet"
+      : "Download Report";
+
+  const handleDownload = async () => {
+    if (!canDownload) return;
+    const { generateReportPdf } = await import("../utils/pdfReport.js");
+    generateReportPdf(data);
+  };
+
   return (
     <header className="flex min-h-16 flex-wrap items-center justify-between gap-4 border-b border-border bg-background px-8 py-3">
       <div className="flex max-w-2xl flex-1 flex-col gap-1">
@@ -67,12 +80,16 @@ export function Navbar() {
 
       <div className="flex items-center gap-4">
         <Button
+          type="button"
           variant="ghost"
           size="icon"
-          className="relative h-9 w-9 text-muted-foreground hover:bg-card hover:text-foreground"
+          title={downloadTitle}
+          aria-label={downloadTitle}
+          disabled={!canDownload}
+          onClick={() => void handleDownload()}
+          className="relative h-9 w-9 text-muted-foreground hover:bg-card hover:text-foreground disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent"
         >
-          <Bell className="h-5 w-5" />
-          <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-[#EF4444]" />
+          <Download className="h-5 w-5" />
         </Button>
         <Avatar className="h-8 w-8">
           {user && <AvatarImage src={user.picture} alt={user.name} />}
